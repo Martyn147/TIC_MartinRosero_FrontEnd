@@ -1,6 +1,12 @@
+//          export const Header = () => {
+
+
 import React from 'react'
 import canasta from "../../images/canasta.png"
+import '../Header/style.css';
 import { Link } from 'react-router-dom'
+import 'boxicons';
+
 
 export const Header = () => {
     return (
@@ -17,7 +23,13 @@ export const Header = () => {
                     <Link to="/">INICIO</Link>
                 </li>
                 <li>
-                    <Link to="/productos">PRODUCTOS </Link>
+                    <Link to="/productos">PRODUCTOS</Link>
+                </li>
+                <li>
+                    <Link to="/login">INGRESAR</Link>
+                </li>
+                <li>
+                    <Link to="/register">REGISTRATE</Link>
                 </li>
             </ul>
             <div className="cart">

@@ -1,0 +1,75 @@
+ /* HEADER */
+  
+ header {
+    width: 97%;
+    min-height: 100px;
+    max-width: 1530px;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    position: fixed;
+    top: 0;
+    z-index: 999; /* Ajusta el valor de z-index según sea necesario */
+    box-sizing: border-box;
+    border-radius: 16px;
+    background-color: whitesmoke;
+    box-shadow: 0 5px 10px gray;
+  }
+  
+  a{
+  
+    color: black;
+    text-decoration: none;
+    text-transform: uppercase;
+  }
+  
+  a:hover{
+    color: cornflowerblue;
+  }
+  
+  li{
+    list-style: none;
+  }
+  
+  header ul{
+    display: flex;
+    padding: 0;
+    margin: 0;
+  }
+  
+  header ul li{
+    margin: 0 1rem;
+  }
+  
+  header ul li a{
+    font-weight: bold;
+  }
+  
+  header .cart{
+    position: relative;
+    cursor: pointer;
+  }
+  
+  header .cart box-icon{
+    width: 45px;
+    height: 45px;
+  }
+  
+  header .cart span{
+    position: absolute;
+    top: -1rem;
+    right: -1.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    padding: 0rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+    background-color: skyblue;
+  } 
