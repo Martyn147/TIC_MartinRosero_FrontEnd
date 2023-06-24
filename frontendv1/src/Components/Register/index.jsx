@@ -1,11 +1,11 @@
-import "../Register/style.css";
-import "@fortawesome/fontawesome-free/css/all.min.css";
-import "mdb-react-ui-kit/dist/css/mdb.min.css";
-import canasta from "../../images/canasta.png";
-
 import React, { useState } from "react";
-import { MDBBtn, MDBContainer, MDBRow, MDBCol, MDBInput } from "mdb-react-ui-kit";
-import { Link } from "react-router-dom";
+import { MDBContainer, MDBRow, MDBCol, MDBInput, MDBBtn } from "mdb-react-ui-kit";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import Cookies from "js-cookie";
+import canasta from "../../images/canasta.png";
+import "./style.css";
+
 
 export const Register = () => {
   const [formData, setFormData] = useState({
@@ -18,9 +18,11 @@ export const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [serverErrors, setServerErrors] = useState({});
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
   };
 
   const handleSubmit = (e) => {
@@ -61,23 +63,31 @@ export const Register = () => {
       console.log("Formulario enviado");
 
       // Realizar la solicitud POST al endpoint de registro
-      fetch("http://127.0.0.1:8000/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+      axios
+      .post("http://127.0.0.1:8000/api/register", formData)
+      .then((response) => {
+        // Manejar la respuesta del servidor
+        console.log(response.data);
+
+        // Obtener el token de acceso de la respuesta
+        const { token } = response.data;
+
+        // Guardar el token en la cookie
+        Cookies.set("registro", token);
+
+        // Realizar alguna acción adicional aquí
+        navigate("/");
       })
-        .then((response) => response.json())
-        .then((data) => {
-          // Manejar la respuesta del servidor
-          console.log(data); // Puedes realizar alguna acción adicional aquí
-        })
-        .catch((error) => {
+      .catch((error) => {
+        if (error.response && error.response.data && error.response.data.errors) {
+          setErrors(error.response.data.errors);
+          setServerErrors({});
+        } else {
           console.error("Error:", error);
-        });
-    }
-  };
+        }
+      });
+  }
+};
 
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -90,103 +100,128 @@ export const Register = () => {
   };
 
   return (
-    <MDBContainer className="my-5 gradient-form pt-5">
+    <MDBContainer className="my-5 register-container">
       <MDBRow>
         <MDBCol col="6" className="mb-5">
           <div className="d-flex flex-column ms-5 bd-5 me-5">
             <div className="text-center">
               <Link to="/">
-                <img src={canasta} style={{ width: "150px" }} alt="logo" />
+                <img src={canasta} className="register-image" alt="logo" />
               </Link>
-              <h4 className="mt-1 mb-5 pb-1">Regístrate</h4>
+              <h4 className="mt-1 mb-5 pb-1 register-title">Regístrate</h4>
             </div>
-            <MDBInput
-              wrapperClass="mt-4"
-              label="Nombres"
-              id="form1"
-              type="text"
-              name="nombres"
-              value={formData.nombres}
-              onChange={handleChange}
-              required
-              validation="required"
-            />
-            {errors.nombres && <div className="errormensaje">{errors.nombres}</div>}
+            <form onSubmit={handleSubmit} className="register-form">
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Nombres"
+                id="form1"
+                type="text"
+                name="nombres"
+                value={formData.nombres}
+                onChange={handleChange}
+                required
+                validation="required"
+                invalid={errors.nombres ? "true" : "false"}
+              />
+              {errors.nombres && (
+                <div className="register-error">{errors.nombres}</div>
+              )}
 
-            <MDBInput
-              wrapperClass="mt-4"
-              label="Apellidos"
-              id="form2"
-              type="text"
-              name="apellidos"
-              value={formData.apellidos}
-              onChange={handleChange}
-              required
-              validation="required"
-            />
-            {errors.apellidos && <div className="errormensaje">{errors.apellidos}</div>}
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Apellidos"
+                id="form2"
+                type="text"
+                name="apellidos"
+                value={formData.apellidos}
+                onChange={handleChange}
+                required
+                validation="required"
+                invalid={errors.apellidos ? "true" : "false"}
+              />
+              {errors.apellidos && (
+                <div className="register-error">{errors.apellidos}</div>
+              )}
 
-            <MDBInput
-              wrapperClass="mt-4"
-              label="Correo Electrónico"
-              id="form3"
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              validation="required"
-            />
-            {errors.email && <div className="errormensaje">{errors.email}</div>}
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Correo Electrónico"
+                id="form3"
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                validation="required"
+                invalid={errors.email ? "true" : "false"}
+              />
+              {errors.email && (
+                <div className="register-error">{errors.email}</div>
+              )}
 
-            <MDBInput
-              wrapperClass="mt-4"
-              label="Teléfono"
-              id="form4"
-              type="text"
-              name="telefono"
-              value={formData.telefono}
-              onChange={handleChange}
-            />
-            {errors.telefono && <div className="errormensaje">{errors.telefono}</div>}
 
-            <MDBInput
-              wrapperClass="mt-4"
-              label="Contraseña"
-              id="form5"
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              validation="required"
-            />
-            {errors.password && <div className="errormensaje">{errors.password}</div>}
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Teléfono"
+                id="form4"
+                type="text"
+                name="telefono"
+                value={formData.telefono}
+                onChange={handleChange}
+                required
+                validation="required"
+                invalid={errors.telefono ? "true" : "false"}
+              />
+              {errors.telefono && (
+                <div className="register-error">{errors.telefono}</div>
+              )}
 
-            <MDBInput
-              wrapperClass="mt-4"
-              label="Confirmar Contraseña"
-              id="form6"
-              type="password"
-              name="password_confirmation"
-              value={formData.password_confirmation}
-              onChange={handleChange}
-              required
-              validation="required"
-            />
-            {errors.password_confirmation && (
-              <div className="errormensaje">{errors.password_confirmation}</div>
-            )}
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Contraseña"
+                id="form5"
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                validation="required"
+                invalid={errors.password ? "true" : "false"}
+              />
+              {errors.password && (
+                <div className="register-error">{errors.password}</div>
+              )}
 
-            <div className="text-center pt-1 mb-5 pb-1 mt-3">
-              <MDBBtn className="mb-4 w-100 gradient-custom-2" onClick={handleSubmit}>
-                Registrarse
-              </MDBBtn>
-            </div>
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Confirmar Contraseña"
+                id="form6"
+                type="password"
+                name="password_confirmation"
+                value={formData.password_confirmation}
+                onChange={handleChange}
+                required
+                validation="required"
+                invalid={errors.password_confirmation ? "true" : "false"}
+              />
+              {errors.password_confirmation && (
+                <div className="register-error">
+                  {errors.password_confirmation}
+                </div>
+              )}
 
-            <div className="d-flex flex-row align-items-center justify-content-center pb-2 mb-4">
-              <p className="mb-0">¿Ya tienes una cuenta?</p>
-              <Link to="/login">
+              <div className="text-center pt-1 mb-5 pb-1 mt-3">
+                <MDBBtn className="mb-4 w-100 gradient-custom-2" type="submit">
+                  Registrarse
+                </MDBBtn>
+              </div>
+            </form>
+
+            <div className="register-link-container">
+              <p className="mb-0 register-link-text">
+                ¿Ya tienes una cuenta?
+              </p>
+              <Link to="/login" className="register-link">
                 <MDBBtn outline className="mx-2" color="danger">
                   Iniciar Sesión
                 </MDBBtn>

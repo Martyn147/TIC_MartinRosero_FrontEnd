@@ -1,7 +1,42 @@
-.error-message {
+.login-container {
+  margin-top: 5rem;
+}
+
+.login-image {
+  width: 150px;
+}
+
+.login-title {
+  margin-top: 1rem;
+  margin-bottom: 5px;
+}
+
+.login-form {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.login-error {
   color: red;
-  font-size: 14px;
+  font-size: 0.875rem;
   margin-top: 5px;
+}
+
+.login-link-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+}
+
+.login-link-text {
+  margin-bottom: 0;
+}
+
+.login-link {
+  margin-left: 2px;
 }
 
 .gradient-custom-2 {
@@ -18,11 +53,5 @@
 @media (min-width: 768px) {
   .gradient-form {
     height: 100vh !important;
-  }
-}
-@media (min-width: 769px) {
-  .gradient-custom-2 {
-    border-top-right-radius: .3rem;
-    border-bottom-right-radius: .3rem;
   }
 }

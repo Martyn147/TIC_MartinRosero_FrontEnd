@@ -1,35 +1,46 @@
-import React, { useState } from 'react';
-import { MDBBtn, MDBContainer, MDBRow, MDBCol, MDBInput } from 'mdb-react-ui-kit';
-import { Link } from 'react-router-dom';
-import canasta from '../../images/canasta.png';
-import '../Login/style.css';
+import React, { useState } from "react";
+import {
+  MDBBtn,
+  MDBContainer,
+  MDBRow,
+  MDBCol,
+  MDBInput,
+} from "mdb-react-ui-kit";
+import { Link, useNavigate } from "react-router-dom";
+import canasta from "../../images/canasta.png";
+import "./style.css";
+import axios from "axios";
 
 export const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [serverErrors, setServerErrors] = useState({});
   const [errors, setErrors] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
+  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (name === 'email') {
+    if (name === "email") {
       setEmail(value);
       setErrors((prevState) => ({
         ...prevState,
-        email: '',
+        email: "",
       }));
-    } else if (name === 'password') {
+      setServerErrors({});
+    } else if (name === "password") {
       setPassword(value);
       setErrors((prevState) => ({
         ...prevState,
-        password: '',
+        password: "",
       }));
+      setServerErrors({});
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validar campos
@@ -39,13 +50,13 @@ export const Login = () => {
     if (!email) {
       setErrors((prevState) => ({
         ...prevState,
-        email: 'El email es obligatorio',
+        email: "El email es obligatorio",
       }));
       isValid = false;
     } else if (!emailRegex.test(email)) {
       setErrors((prevState) => ({
         ...prevState,
-        email: 'El email no es válido',
+        email: "El email no es válido",
       }));
       isValid = false;
     }
@@ -53,84 +64,132 @@ export const Login = () => {
     if (!password) {
       setErrors((prevState) => ({
         ...prevState,
-        password: 'La contraseña es obligatoria',
+        password: "La contraseña es obligatoria",
       }));
       isValid = false;
     }
 
     // Enviar formulario si es válido
     if (isValid) {
-      // Aquí puedes enviar el formulario o realizar alguna acción
-      console.log('Formulario enviado');
+      const userData = {
+        email: email,
+        password: password,
+      };
+
+      try {
+        const response = await axios.post(
+          "http://127.0.0.1:8000/api/login",
+          userData
+        );
+        if (response.status === 200 && response.data.access_token) {
+          // El inicio de sesión fue exitoso y se recibió un token de acceso
+          console.log("Inicio de sesión exitoso");
+
+          // Establecer cookie con el token de acceso
+          document.cookie = `registro=${response.data.access_token}; path=/`;
+
+          navigate("/"); // Redirigir a la ruta de inicio
+        } else {
+          // Hubo un error en el inicio de sesión
+          console.log("Error en el inicio de sesión");
+        }
+      } catch (error) {
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.errors
+        ) {
+          setErrors(error.response.data.errors);
+          setServerErrors({});
+        } else if (
+          error.response &&
+          error.response.data &&
+          error.response.data.error
+        ) {
+          setServerErrors({ message: error.response.data.error });
+          setErrors({});
+        } else {
+          console.error("Error:", error);
+        }
+      }
     }
   };
 
   return (
-    <MDBContainer className="my-5 gradient-form pt-5">
+    <MDBContainer className="my-5 login-container">
       <MDBRow>
         <MDBCol col="6" className="mb-5">
           <div className="d-flex flex-column ms-5 bd-5 me-5">
             <div className="text-center">
               <Link to="/">
-                <img src={canasta} style={{ width: '150px' }} alt="logo" />
+                <img src={canasta} className="login-image" alt="logo" />
               </Link>
-              <h4 className="mt-1 mb-5 pb-1">Inicio de Sesion</h4>
+              <h4 className="mt-1 mb-5 pb-1 login-title">Inicio de Sesión</h4>
             </div>
 
-            <p>Ingrese sus datos</p>
+            <form onSubmit={handleSubmit}>
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Correo Electrónico"
+                id="form3"
+                type="email"
+                name="email"
+                value={email}
+                onChange={handleInputChange}
+                required
+                validation="required"
+                invalid={errors.email ? "true" : "false"}
+              />
+              {errors.email && (
+                <div className="login-error">{errors.email}</div>
+              )}
 
-            <MDBInput
-              wrapperClass=""
-              label="Email"
-              id="form1"
-              type="email"
-              name="email"
-              value={email}
-              onChange={handleInputChange}
-              error={errors.email}
-            />
-            {errors.email && <div className="error-message">{errors.email}</div>}
+              <MDBInput
+                wrapperClass="mt-4"
+                label="Contraseña"
+                id="form2"
+                type="password"
+                name="password"
+                value={password}
+                onChange={handleInputChange}
+                required
+                validation="required"
+                invalid={errors.password ? "true" : "false"}
+              />
+              {errors.password && (
+                <div className="login-error">{errors.password}</div>
+              )}
+              {serverErrors.message && (
+                <div className="login-error">{serverErrors.message}</div>
+              )}
 
-            <MDBInput
-              wrapperClass="mt-4"
-              label="Contraseña"
-              id="form2"
-              type="password"
-              name="password"
-              value={password}
-              onChange={handleInputChange}
-              error={errors.password}
-            />
-            {errors.password && <div className="error-message">{errors.password}</div>}
-
-            <div className="text-center pt-1 mb-5 pb-1 mt-3">
-              <MDBBtn className="mb-4 w-100 gradient-custom-2" onClick={handleSubmit}>
-                Ingresar
-              </MDBBtn>
-              <a className="text-muted" href="#!">
-                ¿Olvido su Contraseña?
-              </a>
-            </div>
-
-            <div className="d-flex flex-row align-items-center justify-content-center pb-2 mb-4">
-              <p className="mb-0">Crear una cuenta</p>
-              <Link to="/register">
-                <MDBBtn outline className="mx-2" color="danger">
-                  Registrarse
+              <div className="text-center pt-1 mb-5 pb-1 mt-3">
+                <MDBBtn className="mb-4 w-100 gradient-custom-2" type="submit">
+                  Ingresar
                 </MDBBtn>
-              </Link>
-            </div>
+                <a className="text-muted" href="#!">
+                  ¿Olvidó su Contraseña?
+                </a>
+              </div>
+
+              <div className="login-link-container">
+                <p className="mb-0 login-link-text">Crear una cuenta</p>
+                <Link to="/register" className="login-link">
+                  <MDBBtn outline className="mx-2" color="danger">
+                    Registrarse
+                  </MDBBtn>
+                </Link>
+              </div>
+            </form>
           </div>
         </MDBCol>
 
-        <MDBCol col="6" className="mb-5">
-          <div className="d-flex flex-column  justify-content-center gradient-custom-2 h-100 mb-4">
+        <MDBCol col="6" className="mb-5 gradient-custom-2">
+          <div className="d-flex flex-column justify-content-center h-100 mb-4">
             <div className="text-white px-3 py-4 p-md-5 mx-md-4">
-              <h4 className="mb-4">We are more than just a company</h4>
-              <p className="small mb-0">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-                dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
-                ea commodo consequat.
+              <h4 className="mb-3">PideXAqui</h4>
+              <p className="big mb-0">
+              La forma rápida y fácil de ordenar lo que necesitas
               </p>
             </div>
           </div>

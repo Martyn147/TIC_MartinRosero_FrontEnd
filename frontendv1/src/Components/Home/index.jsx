@@ -1,7 +1,5 @@
 import React from 'react';
-import Portada from "../../images/inicio.jpg";
-import { Link } from 'react-router-dom';
-import { MDBCarousel, MDBCarouselItem } from "mdb-react-ui-kit";
+
 import {
   MDBCard,
   MDBCardImage,
