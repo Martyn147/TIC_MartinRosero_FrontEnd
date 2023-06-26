@@ -1,0 +1,15 @@
+.card-image {
+    height: 200px; /* Ajusta la altura deseada para las imágenes */
+    object-fit: cover; /* Asegura que la imagen se ajuste al contenedor sin deformarse */
+  }
+  
+
+  
+  .inicio {
+    padding-top: 25px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+
+  }
+  

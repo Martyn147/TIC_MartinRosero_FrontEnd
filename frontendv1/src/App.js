@@ -1,9 +1,9 @@
 import React from "react";
 import { Header } from "./Components/Header";
-//import "boxicons";
+import Footer from "./Components/Footer"; // Importa el componente Footer
+// import "boxicons";
 import { BrowserRouter as Router, useLocation } from "react-router-dom";
-import {Paginas} from "./Components/Paginas" 
-
+import { Paginas } from "./Components/Paginas";
 
 function App() {
   const location = useLocation();
@@ -13,9 +13,11 @@ function App() {
     <div className="App">
       {!isLoginPage && !isRegisterPage && <Header />}
       <Paginas />
+      {!isLoginPage && !isRegisterPage && <Footer />} {/* Agrega el componente Footer */}
     </div>
   );
 }
+
 export default function AppWrapper() {
   return (
     <Router>

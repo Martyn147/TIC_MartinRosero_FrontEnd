@@ -31,3 +31,22 @@ code {
     padding: 0;
   }
 }
+
+/* Estilos para el Footer */
+.footer {
+  width: 100%;
+  /* position: fixed; */
+  
+  bottom: 0;
+  left: 0;
+  background-color: #f8f9fa;
+  padding: 20px;
+  z-index: 100; /* Asegura que el Footer esté en el frente */
+}
+
+.footer-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
