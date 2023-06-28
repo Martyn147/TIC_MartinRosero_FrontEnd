@@ -102,10 +102,14 @@ export const Header = () => {
         </li>
         {isAuthenticated ? (
           <li>
-            <Link to="/" onClick={handleLogout}>
+            <Link to="/" onClick={handleLogout}  style={{ paddingRight: '20px' }}>
               SALIR
             </Link>
-          </li>
+            
+            <Link to="/MyProfile">
+              Perfil
+            </Link>
+          </li>          
         ) : (
           <>
             <li>

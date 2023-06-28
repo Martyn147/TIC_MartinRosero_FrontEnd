@@ -7,6 +7,7 @@
   import {CrudProducts} from "./CrudProducts"
   import {CreateProducts} from "./CreateProducts"
   import {ShopingCart} from "./ShopingCart"
+  import {Profile} from "./Profile"
 
   export const Paginas = () => {
     return (
@@ -19,6 +20,7 @@
               <Route path='/IndexProducts' exact Component={CrudProducts}/>
               <Route path='/CreateProduct' exact Component={CreateProducts}/>
               <Route path='/mycart' exact Component={ShopingCart}/>
+              <Route path='/MyProfile' exact Component={Profile}/>
 
           </Routes>
       </section>
