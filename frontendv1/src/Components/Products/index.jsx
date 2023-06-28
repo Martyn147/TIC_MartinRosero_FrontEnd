@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useLocation } from 'react-router-dom';
+import Cookies from 'js-cookie';
 import {
   MDBContainer,
   MDBRow,
@@ -12,17 +13,17 @@ import {
   MDBBtn,
   MDBRipple,
   MDBInput,
-} from "mdb-react-ui-kit";
-import "./style.css";
+} from 'mdb-react-ui-kit';
+import './style.css';
 
 export function ProductsList() {
   const [products, setProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const categoryParam = searchParams.get("category");
+  const categoryParam = searchParams.get('category');
 
   useEffect(() => {
     fetchProducts();
@@ -36,7 +37,7 @@ export function ProductsList() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/products");
+      const response = await axios.get('http://127.0.0.1:8000/api/products');
       setProducts(response.data);
     } catch (error) {
       console.log(error);
@@ -56,23 +57,81 @@ export function ProductsList() {
   const updateURLParams = (selectedCategory) => {
     const queryParams = new URLSearchParams();
     if (selectedCategory) {
-      queryParams.set("categoria", selectedCategory);
+      queryParams.set('categoria', selectedCategory);
     }
     const path = `${location.pathname}?${queryParams.toString()}`;
-    window.history.replaceState(null, "", path);
+    window.history.replaceState(null, '', path);
   };
 
   const filteredProducts = products.filter((product) => {
     const matchSearch =
-      product.nombre_producto
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
+      product.nombre_producto.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.detalle.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCategory =
-      categoryFilter === "" || product.id_categoria === parseInt(categoryFilter);
+      categoryFilter === '' || product.id_categoria === parseInt(categoryFilter);
 
     return matchSearch && matchCategory;
   });
+
+  const addToCart = async (product) => {
+    // Verificar si la cantidad seleccionada supera el stock disponible
+    if (parseInt(product.cantidad) > product.stock_number) {
+      console.log('La cantidad seleccionada supera el stock disponible');
+      return;
+    }
+
+    const cartCookie = Cookies.get('carrito');
+    if (!cartCookie) {
+      // Crea la cookie "carrito"
+      Cookies.set('carrito', 'carrito creado');
+
+      // Envía la petición y guarda la respuesta en la cookie "infocart"
+      try {
+        const response = await axios.post('http://127.0.0.1:8000/api/cart/create', {
+          id_user: 1,
+        });
+        Cookies.set('infocart', JSON.stringify(response.data));
+
+        // Extrae el ID del carrito de la respuesta
+        const cartId = response.data['cart id'];
+
+        // Envía los datos del producto añadido al carrito a la ruta http://127.0.0.1:8000/api/cart/add
+        const addProductResponse = await axios.post('http://127.0.0.1:8000/api/cart/add', {
+          id_cart: cartId,
+          id_producto: product.id,
+          cantidad: parseInt(product.cantidad),
+        });
+        console.log('Producto añadido al carrito:', addProductResponse.data);
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      const infocartCookie = Cookies.get('infocart');
+      let cartId;
+
+      try {
+        // Extrae el ID del carrito de la respuesta
+        const infocartData = JSON.parse(infocartCookie);
+        cartId = infocartData['cart id'];
+
+        // Envía los datos del producto añadido al carrito a la ruta http://127.0.0.1:8000/api/cart/add
+        const addProductResponse = await axios.post('http://127.0.0.1:8000/api/cart/add', {
+          id_cart: cartId,
+          id_producto: product.id,
+          cantidad: parseInt(product.cantidad),
+        });
+        console.log('Producto añadido al carrito:', addProductResponse.data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    // Aquí puedes implementar la lógica para agregar el producto al carrito de compras
+    console.log('Añadir al carrito:', product);
+
+    // Emitir el evento personalizado 'addToCart'
+    document.dispatchEvent(new Event('addToCart'));
+  };
 
   return (
     <MDBContainer fluid className="Products my-5 text-center">
@@ -82,12 +141,7 @@ export function ProductsList() {
 
       <MDBRow>
         <MDBCol md="6" className="mb-4">
-          <MDBInput
-            type="text"
-            label="Buscar"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
+          <MDBInput type="text" label="Buscar" value={searchTerm} onChange={handleSearch} />
         </MDBCol>
 
         <MDBCol md="6" className="mb-4">
@@ -123,7 +177,7 @@ export function ProductsList() {
                   <div className="mask"></div>
                   <div
                     className="hover-overlay"
-                    style={{ backgroundColor: "rgba(251, 251, 251, 0.15)" }}
+                    style={{ backgroundColor: 'rgba(251, 251, 251, 0.15)' }}
                   ></div>
                 </a>
               </MDBRipple>
@@ -133,6 +187,18 @@ export function ProductsList() {
                   <h6 className="mb-3">{product.detalle}</h6>
                 </a>
                 <h6 className="mb-3">${product.valor_venta}</h6>
+                <h6 className="mb-3">{product.stock_number}</h6>
+                <MDBInput
+                  type="number"
+                  min="1"
+                  max={product.stock_number}
+                  label="Cantidad"
+                  value={product.cantidad}
+                  onChange={(e) => {
+                    product.cantidad = e.target.value;
+                  }}
+                />
+                <MDBBtn onClick={() => addToCart(product)}>Añadir al carrito</MDBBtn>
               </MDBCardBody>
             </MDBCard>
           </MDBCol>

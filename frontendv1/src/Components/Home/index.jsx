@@ -27,7 +27,7 @@ export const Home = () => {
         <MDBCol>
           <MDBCard
             className="h-100 hover-zoom"
-            onClick={() => handleCardClick("1")}
+            onClick={() => handleCardClick("2")}
           >
             <MDBCardImage
               className="card-image"
@@ -50,7 +50,7 @@ export const Home = () => {
         <MDBCol>
           <MDBCard
             className="h-100 hover-zoom"
-            onClick={() => handleCardClick("2")}
+            onClick={() => handleCardClick("3")}
           >
             <MDBCardImage
               className="card-image"
@@ -73,7 +73,7 @@ export const Home = () => {
         <MDBCol>
           <MDBCard
             className="h-100 hover-zoom"
-            onClick={() => handleCardClick("3")}
+            onClick={() => handleCardClick("1")}
           >
             <MDBCardImage
               className="card-image"
