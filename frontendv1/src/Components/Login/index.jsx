@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import canasta from "../../images/canasta.png";
 import "./style.css";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 export const Login = () => {
   const [email, setEmail] = useState("");
@@ -86,9 +87,17 @@ export const Login = () => {
           console.log("Inicio de sesión exitoso");
 
           // Establecer cookie con el token de acceso
-          document.cookie = `registro=${response.data.access_token}; path=/`;
+        
+          Cookies.set('token', response.data.access_token, { path: '/' });
+          Cookies.set('registro', JSON.stringify(response.data));
+          Cookies.set('idRole', response.data.user_role, { path: '/' });
+          Cookies.set('id_user', response.data.user_id, { path: '/' });
+
+          
+          
 
           navigate("/"); // Redirigir a la ruta de inicio
+          window.location.reload();
         } else {
           // Hubo un error en el inicio de sesión
           console.log("Error en el inicio de sesión");

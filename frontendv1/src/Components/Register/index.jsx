@@ -73,10 +73,17 @@ export const Register = () => {
         const { token } = response.data;
 
         // Guardar el token en la cookie
-        Cookies.set("registro", token);
+        Cookies.set("token", token);  
+        Cookies.set('registro', JSON.stringify(response.data));
+       // Cookies.set('id_user', response.data.client, { path: '/' });
+        Cookies.set('id_user', response.data.client.id_user, { path: '/' });
+        Cookies.set('idRole', response.data.user.idRole, { path: '/' });
+        
+        
 
         // Realizar alguna acción adicional aquí
         navigate("/");
+        window.location.reload();
       })
       .catch((error) => {
         if (error.response && error.response.data && error.response.data.errors) {

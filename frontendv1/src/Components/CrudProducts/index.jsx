@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   MDBContainer,
   MDBTable,
@@ -20,7 +20,10 @@ import {
 } from "mdb-react-ui-kit";
 import "./style.css";
 
+import axiosInstance from '../axiosInstance';
+
 export function CrudProducts() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [formData, setFormData] = useState({
@@ -40,7 +43,7 @@ export function CrudProducts() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get("http://127.0.0.1:8000/api/products");
+      const response = await axiosInstance.get('/products');
       setProducts(response.data);
     } catch (error) {
       console.log(error);
@@ -76,6 +79,7 @@ export function CrudProducts() {
 
   const handleEdit = (id) => {
     // Handle edit logic here
+    navigate(`/EditProducts?id=${id}`);
     console.log("Edit product:", id);
   };
 
@@ -87,11 +91,8 @@ export function CrudProducts() {
   const confirmDelete = async () => {
     try {
       const data = { id: productToDelete.id };
-      await axios.delete("http://127.0.0.1:8000/api/products/delete", {
-        data: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json"
-        }
+      await axiosInstance.delete("/products/delete", {
+        data: data,
       });
       fetchProducts();
       setIsDeleteModalOpen(false);
@@ -99,6 +100,7 @@ export function CrudProducts() {
       console.log(error);
     }
   };
+  
   
 
   const categories = [

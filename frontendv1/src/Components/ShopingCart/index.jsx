@@ -1,6 +1,8 @@
 import axios from 'axios';
 import React, { useState, useEffect } from 'react';
 import Cookies from 'js-cookie';
+import axiosInstance from '../axiosInstance';
+import { useNavigate } from "react-router-dom";
 import {
   MDBBtn,
   MDBCard,
@@ -22,6 +24,8 @@ import './style.css';
 
 export const ShopingCart = () => {
   const [cartItems, setCartItems] = useState([]);
+  const [modoPago, setModoPago] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -30,8 +34,7 @@ export const ShopingCart = () => {
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
           const cartId = infocartData['cart id'];
-
-          const response = await axios.get(`http://127.0.0.1:8000/api/cart?id=${cartId}`);
+          const response = await axiosInstance.get(`/cart?id=${cartId}`);
           setCartItems(response.data);
         }
       } catch (error) {
@@ -62,8 +65,30 @@ export const ShopingCart = () => {
     setCartItems(updatedCartItems);
   };
 
+  const handleModoPagoChange = (e) => {
+    setModoPago(e.target.value);
+  };
+
+  const handleFinalizarCompra = async () => {
+    try {
+      const response = await axiosInstance.post('/orders/create', {
+        modo_pago: modoPago,
+      });
+      Cookies.remove('carrito'); 
+      Cookies.remove('infocart'); 
+      navigate("/"); 
+      window.location.reload();
+    
+      // Realiza cualquier acción adicional después de finalizar la compra, como mostrar un mensaje de éxito, redirigir, etc.
+    
+    } catch (error) {
+      console.log('Error al finalizar la compra:', error);
+    }
+    
+  };
+
   return (
-    <MDBContainer  className='shoping-cart'>
+    <MDBContainer className='shoping-cart'>
       <MDBRow className="justify-content-center">
         <MDBCol md="8">
           <MDBCard>
@@ -121,6 +146,34 @@ export const ShopingCart = () => {
                   ))}
                 </MDBListGroup>
               )}
+            </MDBCardBody>
+          </MDBCard>
+          <MDBCard className="mt-3">
+            <MDBCardBody>
+              <MDBRow>
+                <MDBCol md="4">
+                  <label htmlFor="modoPago" className="form-label">
+                    Método de Pago
+                  </label>
+                  <select
+                    className="form-select"
+                    id="modoPago"
+                    value={modoPago}
+                    onChange={handleModoPagoChange}
+                  >
+                    <option value="">Seleccionar método de pago</option>
+                    <option value="PCE">Entrega x paga</option>
+                    <option value="transferencia">Transferencia</option>
+                  </select>
+                </MDBCol>
+              </MDBRow>
+              <MDBRow className="mt-3">
+                <MDBCol>
+                  <MDBBtn color="primary" onClick={handleFinalizarCompra}>
+                    Finalizar Compra
+                  </MDBBtn>
+                </MDBCol>
+              </MDBRow>
             </MDBCardBody>
           </MDBCard>
         </MDBCol>

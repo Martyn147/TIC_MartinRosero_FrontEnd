@@ -1,24 +1,55 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   MDBContainer,
   MDBRow,
   MDBCol,
   MDBInput,
   MDBBtn,
-} from "mdb-react-ui-kit";
-import "./style.css";
+} from 'mdb-react-ui-kit';
+import './style.css';
 import axiosInstance from '../axiosInstance';
+import { useLocation } from 'react-router-dom';
 
-export function CreateProducts() {
+export function EditProducts({ productId }) {
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const idProduct = searchParams.get('id'); //ya tiene el valor
+
   const [formData, setFormData] = useState({
-    id_categoria: "",
-    nombre: "",
-    detalle: "",
-    stock: "",
-    valor: "",
+    id_categoria: '',
+    nombre: '',
+    detalle: '',
+    stock: '',
+    valor: '',
     imagen: null,
   });
+
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        const productsData = {
+          id: parseInt(idProduct),
+        };
+  
+        const response = await axiosInstance.get("/products/find", { params: productsData });
+        const productData = response.data;
+  
+        setFormData({
+          id_categoria: productData.id_categoria.toString(),
+          nombre: productData.nombre_producto,
+          detalle: productData.detalle,
+          stock: productData.stock_number.toString(),
+          valor: productData.valor_venta.toString(),
+          imagen: null,
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    };
+  
+    fetchProductData();
+  }, [idProduct]);
 
   const handleInputChange = (event) => {
     setFormData({
@@ -39,36 +70,39 @@ export function CreateProducts() {
     try {
       const formattedValor = parseFloat(formData.valor).toFixed(2);
       const productData = {
+        id: parseInt(idProduct),
         id_categoria: parseInt(formData.id_categoria),
-        nombre: formData.nombre,
+        nombre_producto: formData.nombre,
         detalle: formData.detalle,
-        stock: parseInt(formData.stock),
-        valor: formattedValor,
+        stock_number: parseInt(formData.stock),
+        valor_venta: formattedValor,
       };
 
-      const response = await axiosInstance.post("/products/store", productData);
-      if (response.status === 201) {
-        const productId = response.data.product_id;
-        console.log("Producto creado con ID:", productId);
+      const response = await axiosInstance.put(
+        `/products/update`,
+        productData
+      );
+      if (response.status === 200) {
+        console.log('Producto actualizado con ID:', productId);
 
-        // Aquí puedes realizar cualquier lógica adicional después de crear el producto
+        // Aquí puedes realizar cualquier lógica adicional después de actualizar el producto
         // ...
 
         if (formData.imagen) {
           const imageData = new FormData();
-          imageData.append("file", formData.imagen);
-          imageData.append("id_producto", productId);
+          imageData.append('file', formData.imagen);
+          imageData.append('id_producto', productId);
 
-          await axiosInstance.post("/image/upload", imageData);
-          console.log("Imagen del producto subida exitosamente");
+          await axiosInstance.post('/api/image/upload', imageData);
+          console.log('Imagen del producto actualizada exitosamente');
         }
 
         setFormData({
-          id_categoria: "",
-          nombre: "",
-          detalle: "",
-          stock: "",
-          valor: "",
+          id_categoria: '',
+          nombre: '',
+          detalle: '',
+          stock: '',
+          valor: '',
           imagen: null,
         });
       }
@@ -78,15 +112,15 @@ export function CreateProducts() {
   };
 
   const categories = [
-    { value: "", text: "Selecciona una categoría" },
-    { value: "1", text: "Alimentos" },
-    { value: "2", text: "Limpieza" },
-    { value: "3", text: "Tecnología" },
+    { value: '', text: 'Selecciona una categoría' },
+    { value: '1', text: 'Alimentos' },
+    { value: '2', text: 'Limpieza' },
+    { value: '3', text: 'Tecnología' },
   ];
 
   return (
-    <MDBContainer className="create-product">
-      <h1>Crear Producto</h1>
+    <MDBContainer className="edit-product">
+      <h1>Editar Producto</h1>
       <form onSubmit={handleSubmit}>
         <MDBRow className="mb-3">
           <MDBCol>
@@ -160,14 +194,13 @@ export function CreateProducts() {
               name="imagen"
               accept="image/*"
               onChange={handleImageChange}
-              required
             />
           </MDBCol>
         </MDBRow>
-        <MDBBtn type="submit">Crear Producto</MDBBtn>
+        <MDBBtn type="submit">Actualizar Producto</MDBBtn>
       </form>
     </MDBContainer>
   );
 }
 
-export default CreateProducts;
+export default EditProducts;

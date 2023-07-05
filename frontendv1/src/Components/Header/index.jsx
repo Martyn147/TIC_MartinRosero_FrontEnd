@@ -5,9 +5,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import 'boxicons';
 import Cookies from 'js-cookie';
 import axios from 'axios';
+import axiosInstance from '../axiosInstance';
 import './style.css';
 
 export const Header = () => {
+
+  const deleteLocalhostCookies = () => {
+    const cookies = Cookies.get();
+    for (const cookie in cookies) {
+      // Verificar si la cookie pertenece al dominio "localhost"
+      if (cookies.hasOwnProperty(cookie) && Cookies.get(cookie, { domain: 'localhost' })) {
+        Cookies.remove(cookie, { domain: 'localhost' });
+      }
+    }
+  };
+
+
   const isAuthenticated = !!Cookies.get('registro');
   const [itemTotal, setItemTotal] = useState(0);
   const navigate = useNavigate();
@@ -19,11 +32,12 @@ export const Header = () => {
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
           const cartId = infocartData['cart id'];
-
-          const response = await axios.get(`http://127.0.0.1:8000/api/cart?id=${cartId}`);
+        
+          const response = await axiosInstance.get(`/cart?id=${cartId}`);
           const productsCount = response.data.length;
           setItemTotal(productsCount);
         }
+        
       } catch (error) {
         console.log('Error al obtener el número de productos del carrito:', error);
       }
@@ -33,15 +47,12 @@ export const Header = () => {
   }, []);
 
   const handleLogout = async () => {
-    try {
-      const token = Cookies.get('registro');
-      if (token) {
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
 
-        await axios.post('http://127.0.0.1:8000/api/logout', null, { headers });
-        Cookies.remove('registro'); // Eliminar la cookie después de cerrar sesión correctamente
+    try {
+      const token = Cookies.get('token');
+      if (token) {
+        await axiosInstance.post('/logout');
+        deleteLocalhostCookies();
         navigate('/'); // Redirigir a la ruta de inicio
       } else {
         console.log('No se encontró el token de acceso');
@@ -58,8 +69,8 @@ export const Header = () => {
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
           const cartId = infocartData['cart id'];
-
-          axios.get(`http://127.0.0.1:8000/api/cart?id=${cartId}`)
+        
+          axiosInstance.get(`/cart?id=${cartId}`)
             .then((response) => {
               const productsCount = response.data.length;
               setItemTotal(productsCount);
@@ -68,6 +79,7 @@ export const Header = () => {
               console.log('Error al obtener el número de productos del carrito:', error);
             });
         }
+        
       } catch (error) {
         console.log('Error al obtener el número de productos del carrito:', error);
       }
@@ -82,6 +94,11 @@ export const Header = () => {
     };
   }, []);
 
+  const idRoleCookie = Cookies.get('idRole');
+  const showAdministrarProductosOption = idRoleCookie === '1';
+  const showProductosOption = idRoleCookie === '3';
+  const showCartSection = idRoleCookie === '3';
+
   return (
     <header>
       <Link to="/">
@@ -95,19 +112,22 @@ export const Header = () => {
           <Link to="/">INICIO</Link>
         </li>
         <li>
-          <Link to="/IndexProducts">Administrar productos</Link>
+          <Link to="/IndexOrders">Ordenes</Link>
         </li>
-        <li>
-          <Link to="/productos">PRODUCTOS</Link>
-        </li>
+        {showAdministrarProductosOption && (
+          <li>
+            <Link to="/IndexProducts">Administrar productos</Link>
+          </li>
+        )}
+        {showProductosOption && (
+          <li>
+            <Link to="/productos">PRODUCTOS</Link>
+          </li>
+        )}
         {isAuthenticated ? (
           <li>
-            <Link to="/" onClick={handleLogout}  style={{ paddingRight: '20px' }}>
+            <Link to="/" onClick={handleLogout} style={{ paddingRight: '20px' }}>
               SALIR
-            </Link>
-            
-            <Link to="/MyProfile">
-              Perfil
             </Link>
           </li>          
         ) : (
@@ -121,13 +141,15 @@ export const Header = () => {
           </>
         )}
       </ul>
-      <div className="cart">
-        <box-icon name="cart"></box-icon>
-        <span className="item__total">
-        <Link to="/mycart">  {itemTotal}</Link>
-        
-        </span>
-      </div>
+ 
+        <div className="cart">
+        {showCartSection && (
+          <><box-icon name="cart"></box-icon><span className="item__total">
+            <Link to="/mycart">{itemTotal}</Link>
+          </span></>
+          )}
+        </div>
+   
     </header>
   );
 };

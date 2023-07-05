@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
+import axiosInstance from '../axiosInstance';
 import {
   MDBContainer,
   MDBRow,
@@ -37,7 +38,7 @@ export function ProductsList() {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/api/products');
+      const response = await axiosInstance.get('/products');
       setProducts(response.data);
     } catch (error) {
       console.log(error);
@@ -87,20 +88,31 @@ export function ProductsList() {
 
       // Envía la petición y guarda la respuesta en la cookie "infocart"
       try {
-        const response = await axios.post('http://127.0.0.1:8000/api/cart/create', {
-          id_user: 1,
+        const idUser = Cookies.get('id_user');
+
+        if (!idUser) {
+          console.log('No se encontró el id_user en la cookie');
+          return;
+        }
+        const response = await axiosInstance.post('/cart/create', {
+          id_user: parseInt(idUser),
         });
+
+        
+
+        
         Cookies.set('infocart', JSON.stringify(response.data));
 
         // Extrae el ID del carrito de la respuesta
         const cartId = response.data['cart id'];
 
         // Envía los datos del producto añadido al carrito a la ruta http://127.0.0.1:8000/api/cart/add
-        const addProductResponse = await axios.post('http://127.0.0.1:8000/api/cart/add', {
+        const addProductResponse = await axiosInstance.post('/cart/add', {
           id_cart: cartId,
           id_producto: product.id,
           cantidad: parseInt(product.cantidad),
         });
+        
         console.log('Producto añadido al carrito:', addProductResponse.data);
       } catch (error) {
         console.log(error);
@@ -115,11 +127,12 @@ export function ProductsList() {
         cartId = infocartData['cart id'];
 
         // Envía los datos del producto añadido al carrito a la ruta http://127.0.0.1:8000/api/cart/add
-        const addProductResponse = await axios.post('http://127.0.0.1:8000/api/cart/add', {
+        const addProductResponse = await axiosInstance.post('/cart/add', {
           id_cart: cartId,
           id_producto: product.id,
           cantidad: parseInt(product.cantidad),
         });
+        
         console.log('Producto añadido al carrito:', addProductResponse.data);
       } catch (error) {
         console.log(error);

@@ -8,7 +8,9 @@
   import {CreateProducts} from "./CreateProducts"
   import {ShopingCart} from "./ShopingCart"
   import {Profile} from "./Profile"
-
+  import {EditProducts} from "./EditProducts"
+  import {CrudOrders} from "./CrudOrders"
+  
   export const Paginas = () => {
     return (
       <section>
@@ -21,6 +23,8 @@
               <Route path='/CreateProduct' exact Component={CreateProducts}/>
               <Route path='/mycart' exact Component={ShopingCart}/>
               <Route path='/MyProfile' exact Component={Profile}/>
+              <Route path='/EditProducts' exact Component={EditProducts}/>
+              <Route path='/IndexOrders' exact Component={CrudOrders}/>
 
           </Routes>
       </section>
