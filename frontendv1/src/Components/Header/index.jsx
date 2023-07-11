@@ -37,6 +37,7 @@ export const Header = () => {
           const productsCount = response.data.length;
           setItemTotal(productsCount);
         }
+        console.log('Fuera del sistema');
         
       } catch (error) {
         console.log('Error al obtener el número de productos del carrito:', error);
