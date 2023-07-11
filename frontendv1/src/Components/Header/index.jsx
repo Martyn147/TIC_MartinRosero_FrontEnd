@@ -37,7 +37,7 @@ export const Header = () => {
           const productsCount = response.data.length;
           setItemTotal(productsCount);
         }
-        console.log('Fuera del sistema');
+   
         
       } catch (error) {
         console.log('Error al obtener el número de productos del carrito:', error);
@@ -55,6 +55,7 @@ export const Header = () => {
         await axiosInstance.post('/logout');
         deleteLocalhostCookies();
         navigate('/'); // Redirigir a la ruta de inicio
+        console.log('Fuera del sistema');
       } else {
         console.log('No se encontró el token de acceso');
       }
