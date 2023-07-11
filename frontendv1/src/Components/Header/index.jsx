@@ -10,41 +10,12 @@ import './style.css';
 
 export const Header = () => {
 
-  const deleteLocalhostCookies = () => {
-    const cookies = Cookies.get();
-    for (const cookie in cookies) {
-      // Verificar si la cookie pertenece al dominio "localhost"
-      if (cookies.hasOwnProperty(cookie) && Cookies.get(cookie, { domain: 'main--bucolic-meringue-964478.netlify.app' })) {
-        Cookies.remove(cookie, { domain: 'main--bucolic-meringue-964478.netlify.app' });
-      }
-    }
-  };
-
-  const deleteNetlifyCookies = () => {
-    const cookies = Cookies.get();
-    for (const cookie in cookies) {
-      // Verificar si la cookie pertenece al dominio "main--bucolic-meringue-964478.netlify.app"
-      if (cookies.hasOwnProperty(cookie) && cookie.includes('main--bucolic-meringue-964478.netlify.app')) {
-        Cookies.remove(cookie, { domain: 'main--bucolic-meringue-964478.netlify.app' });
-      }
-    }
-  };
-
   const deleteDomainCookies = (domain) => {
     const cookies = Cookies.get();
     for (const cookie in cookies) {
       Cookies.remove(cookie, { domain: domain });
     }
   };
-
-  const deleteAllCookies = () => {
-    const cookies = Cookies.get();
-    for (const cookie in cookies) {
-      Cookies.remove(cookie);
-    }
-  };
-  
-
 
   const isAuthenticated = !!Cookies.get('registro');
   const [itemTotal, setItemTotal] = useState(0);
@@ -77,7 +48,7 @@ export const Header = () => {
     try {
       const token = Cookies.get('token');
       if (token) {
-        await axiosInstance.post('/logout');
+      //  await axiosInstance.post('/logout');
         deleteDomainCookies("https://main--bucolic-meringue-964478.netlify.app");
         navigate('/'); // Redirigir a la ruta de inicio
         console.log('Fuera del sistema');
