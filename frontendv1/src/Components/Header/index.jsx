@@ -10,10 +10,13 @@ import './style.css';
 
 export const Header = () => {
 
-  const deleteDomainCookies = (domain) => {
+  const deleteNetlifyCookies = () => {
     const cookies = Cookies.get();
     for (const cookie in cookies) {
-      Cookies.remove(cookie, { domain: domain });
+      // Verificar si la cookie pertenece al dominio "main--bucolic-meringue-964478.netlify.app"
+      if (cookies.hasOwnProperty(cookie) && cookie.includes('main--bucolic-meringue-964478.netlify.app')) {
+        Cookies.remove(cookie, { domain: 'main--bucolic-meringue-964478.netlify.app' });
+      }
     }
   };
 
@@ -49,7 +52,7 @@ export const Header = () => {
       const token = Cookies.get('token');
       if (token) {
       //  await axiosInstance.post('/logout');
-      deleteDomainCookies("https://main--bucolic-meringue-964478.netlify.app");
+      deleteNetlifyCookies();
         navigate('/'); // Redirigir a la ruta de inicio
         console.log('Fuera del sistema');
       } else {
