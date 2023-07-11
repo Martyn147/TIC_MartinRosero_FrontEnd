@@ -30,6 +30,13 @@ export const Header = () => {
     }
   };
 
+  const deleteDomainCookies = (domain) => {
+    const cookies = Cookies.get();
+    for (const cookie in cookies) {
+      Cookies.remove(cookie, { domain: domain });
+    }
+  };
+
   const deleteAllCookies = () => {
     const cookies = Cookies.get();
     for (const cookie in cookies) {
@@ -71,8 +78,7 @@ export const Header = () => {
       const token = Cookies.get('token');
       if (token) {
         await axiosInstance.post('/logout');
-        deleteAllCookies();
-
+        deleteDomainCookies("https://main--bucolic-meringue-964478.netlify.app");
         navigate('/'); // Redirigir a la ruta de inicio
         console.log('Fuera del sistema');
       } else {
