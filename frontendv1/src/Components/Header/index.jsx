@@ -14,8 +14,8 @@ export const Header = () => {
     const cookies = Cookies.get();
     for (const cookie in cookies) {
       // Verificar si la cookie pertenece al dominio "localhost"
-      if (cookies.hasOwnProperty(cookie) && Cookies.get(cookie, { domain: 'localhost' })) {
-        Cookies.remove(cookie, { domain: 'localhost' });
+      if (cookies.hasOwnProperty(cookie) && Cookies.get(cookie, { domain: 'main--bucolic-meringue-964478.netlify.app' })) {
+        Cookies.remove(cookie, { domain: 'main--bucolic-meringue-964478.netlify.app' });
       }
     }
   };
