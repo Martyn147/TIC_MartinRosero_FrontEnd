@@ -49,7 +49,7 @@ export const Header = () => {
     try {
       const token = Cookies.get('token');
       if (token) {
-      //  await axiosInstance.post('/logout');
+      await axiosInstance.post('/logout');
       deleteAllCookies();
         navigate('/'); // Redirigir a la ruta de inicio
         console.log('Fuera del sistema');
