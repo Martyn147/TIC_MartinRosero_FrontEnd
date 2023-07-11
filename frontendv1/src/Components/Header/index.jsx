@@ -30,6 +30,14 @@ export const Header = () => {
     }
   };
 
+  const deleteAllCookies = () => {
+    const cookies = Cookies.get();
+    for (const cookie in cookies) {
+      Cookies.remove(cookie);
+    }
+  };
+  
+
 
   const isAuthenticated = !!Cookies.get('registro');
   const [itemTotal, setItemTotal] = useState(0);
@@ -63,7 +71,7 @@ export const Header = () => {
       const token = Cookies.get('token');
       if (token) {
         await axiosInstance.post('/logout');
-        deleteNetlifyCookies();
+        deleteAllCookies();
 
         navigate('/'); // Redirigir a la ruta de inicio
         console.log('Fuera del sistema');
