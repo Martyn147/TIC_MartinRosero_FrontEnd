@@ -10,6 +10,8 @@
   import {Profile} from "./Profile"
   import {EditProducts} from "./EditProducts"
   import {CrudOrders} from "./CrudOrders"
+  import {CrudAccounts} from "./CrudAccounts"
+  import {CreateAccount} from "./CreateAccount"
   
   export const Paginas = () => {
     return (
@@ -25,9 +27,12 @@
               <Route path='/MyProfile' exact Component={Profile}/>
               <Route path='/EditProducts' exact Component={EditProducts}/>
               <Route path='/IndexOrders' exact Component={CrudOrders}/>
+              <Route path='/IndexAcontsAdmins' exact Component={CrudAccounts}/>
+              <Route path='/CreateAccount' exact Component={CreateAccount}/>
 
           </Routes>
       </section>
 
     )
   }
+  

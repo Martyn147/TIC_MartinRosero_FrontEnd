@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+
 import { useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axiosInstance from '../axiosInstance';
@@ -9,12 +9,12 @@ import {
   MDBCol,
   MDBCard,
   MDBCardBody,
-  MDBCardImage,
-  MDBIcon,
   MDBBtn,
-  MDBRipple,
+  MDBIcon,
   MDBInput,
 } from 'mdb-react-ui-kit';
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './style.css';
 
 export function ProductsList() {
@@ -81,6 +81,14 @@ export function ProductsList() {
       return;
     }
 
+    const tokenCookie = Cookies.get('token'); // Obtén la cookie "token"
+
+    // Redireccionar a la ventana de registro si no hay token
+    if (!tokenCookie) {
+      window.location.href = '/register'; // Cambia '/registro' por la ruta de tu ventana de registro
+      return;
+    }
+
     const cartCookie = Cookies.get('carrito');
     if (!cartCookie) {
       // Crea la cookie "carrito"
@@ -97,10 +105,6 @@ export function ProductsList() {
         const response = await axiosInstance.post('/cart/create', {
           id_user: parseInt(idUser),
         });
-
-        
-
-        
         Cookies.set('infocart', JSON.stringify(response.data));
 
         // Extrae el ID del carrito de la respuesta
@@ -112,7 +116,7 @@ export function ProductsList() {
           id_producto: product.id,
           cantidad: parseInt(product.cantidad),
         });
-        
+
         console.log('Producto añadido al carrito:', addProductResponse.data);
       } catch (error) {
         console.log(error);
@@ -132,7 +136,7 @@ export function ProductsList() {
           id_producto: product.id,
           cantidad: parseInt(product.cantidad),
         });
-        
+
         console.log('Producto añadido al carrito:', addProductResponse.data);
       } catch (error) {
         console.log(error);
@@ -176,42 +180,42 @@ export function ProductsList() {
         {filteredProducts.map((product) => (
           <MDBCol md="12" lg="4" className="mb-4" key={product.id}>
             <MDBCard>
-              <MDBRipple
-                rippleColor="light"
-                rippleTag="div"
-                className="bg-image rounded hover-zoom"
-              >
-                <MDBCardImage
-                  src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Products/belt.webp"
-                  fluid
-                  className="w-100"
-                />
-                <a href="#!">
-                  <div className="mask"></div>
-                  <div
-                    className="hover-overlay"
-                    style={{ backgroundColor: 'rgba(251, 251, 251, 0.15)' }}
-                  ></div>
-                </a>
-              </MDBRipple>
+              {/* Carrusel de imágenes */}
+              <Carousel showArrows={true} infiniteLoop={true}>
+                {product.images.map((image) => (
+                  <div key={image.id}>
+                    <img
+                      src={image.cloudinary_url}
+                      alt={`Imagen ${image.id}`}
+                      style={{ maxWidth: '200px', objectFit: 'cover' }}
+                    />
+                  </div>
+                ))}
+              </Carousel>
+
               <MDBCardBody>
                 <a href="#!" className="text-reset">
                   <h5 className="card-title mb-3">{product.nombre_producto}</h5>
                   <h6 className="mb-3">{product.detalle}</h6>
                 </a>
                 <h6 className="mb-3">${product.valor_venta}</h6>
-                <h6 className="mb-3">{product.stock_number}</h6>
-                <MDBInput
-                  type="number"
-                  min="1"
-                  max={product.stock_number}
-                  label="Cantidad"
-                  value={product.cantidad}
-                  onChange={(e) => {
-                    product.cantidad = e.target.value;
-                  }}
-                />
-                <MDBBtn onClick={() => addToCart(product)}>Añadir al carrito</MDBBtn>
+
+                <div className="d-flex justify-content-between align-items-center">
+                  <MDBInput
+                    type="number"
+                    min="1"
+                    max={product.stock_number}
+                    label="Cantidad"
+                    value={product.cantidad}
+                    onChange={(e) => {
+                      product.cantidad = e.target.value;
+                    }}
+                  />
+                  <MDBBtn color="success" onClick={() => addToCart(product)}>
+                    Añadir al carrito
+                    <MDBIcon icon="cart-plus" className="ms-2" />
+                  </MDBBtn>
+                </div>
               </MDBCardBody>
             </MDBCard>
           </MDBCol>

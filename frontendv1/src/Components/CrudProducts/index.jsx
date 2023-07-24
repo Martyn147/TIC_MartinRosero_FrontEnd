@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import {
   MDBContainer,
@@ -7,7 +6,6 @@ import {
   MDBTableHead,
   MDBTableBody,
   MDBBtn,
-  MDBInputGroup,
   MDBRow,
   MDBCol,
   MDBInput,

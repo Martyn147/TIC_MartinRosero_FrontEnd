@@ -1,7 +1,6 @@
-import axios from 'axios';
-import React, { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import axiosInstance from '../axiosInstance';
+import React, { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import axiosInstance from "../axiosInstance";
 import { useNavigate } from "react-router-dom";
 import {
   MDBBtn,
@@ -12,87 +11,152 @@ import {
   MDBCol,
   MDBContainer,
   MDBIcon,
-  MDBInput,
   MDBListGroup,
   MDBListGroupItem,
-  MDBRipple,
   MDBRow,
-  MDBTooltip,
   MDBTypography,
-} from 'mdb-react-ui-kit';
-import './style.css';
+} from "mdb-react-ui-kit";
+import "./style.css";
 
 export const ShopingCart = () => {
   const [cartItems, setCartItems] = useState([]);
-  const [modoPago, setModoPago] = useState('');
+  const [modoPago, setModoPago] = useState("");
+  const [showBankAccountInfo, setShowBankAccountInfo] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const infocartCookie = Cookies.get('infocart');
+        const infocartCookie = Cookies.get("infocart");
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
-          const cartId = infocartData['cart id'];
+          const cartId = infocartData["cart id"];
           const response = await axiosInstance.get(`/cart?id=${cartId}`);
           setCartItems(response.data);
         }
       } catch (error) {
-        console.log('Error al obtener los elementos del carrito:', error);
+        console.log("Error al obtener los elementos del carrito:", error);
       }
     };
 
     fetchCartItems();
   }, []);
 
-  const handleIncreaseQuantity = (itemId) => {
-    const updatedCartItems = cartItems.map((item) => {
-      if (item.id_producto === itemId) {
-        return { ...item, cantidad: item.cantidad + 1 };
-      }
-      return item;
-    });
-    setCartItems(updatedCartItems);
-  };
+  const handleDecrementItem = async (itemId) => {
+    try {
+      const infocartCookie = Cookies.get("infocart");
+      if (infocartCookie) {
+        const infocartData = JSON.parse(infocartCookie);
+        const cartId = infocartData["cart id"];
 
-  const handleDecreaseQuantity = (itemId) => {
-    const updatedCartItems = cartItems.map((item) => {
-      if (item.id_producto === itemId && item.cantidad > 1) {
-        return { ...item, cantidad: item.cantidad - 1 };
+        // Realiza la petición a la ruta "/cart/remove"
+        await axiosInstance.delete("/cart/remove", {
+          data: {
+            id_cart: cartId,
+            id_producto: itemId,
+            cantidad: 1, // Decrementar en 1
+          },
+        });
+
+        // Actualiza los elementos del carrito después de la respuesta exitosa
+        const updatedCartItems = cartItems.map((item) => {
+          if (item.id_producto === itemId && item.cantidad > 1) {
+            const newCantidad = item.cantidad - 1;
+            const newSumaPrecio = newCantidad * item.valor_venta;
+
+            return {
+              ...item,
+              cantidad: newCantidad,
+              suma_precio: newSumaPrecio,
+            };
+          }
+          return item;
+        });
+        setCartItems(updatedCartItems);
       }
-      return item;
-    });
-    setCartItems(updatedCartItems);
+    } catch (error) {
+      console.log("Error al decrementar el artículo en el carrito:", error);
+    }
   };
 
   const handleModoPagoChange = (e) => {
     setModoPago(e.target.value);
+
+    // Si la opción seleccionada es "transferencia", mostramos la sección con datos falsos de la cuenta bancaria
+    if (e.target.value === "transferencia") {
+      setShowBankAccountInfo(true);
+    } else {
+      setShowBankAccountInfo(false);
+    }
   };
 
   const handleFinalizarCompra = async () => {
     try {
-      const response = await axiosInstance.post('/orders/create', {
+      const response = await axiosInstance.post("/orders/create", {
         modo_pago: modoPago,
       });
-      Cookies.remove('carrito'); 
-      Cookies.remove('infocart'); 
-      navigate("/"); 
+      Cookies.remove("carrito");
+      Cookies.remove("infocart");
+      navigate("/");
       window.location.reload();
-    
+
       // Realiza cualquier acción adicional después de finalizar la compra, como mostrar un mensaje de éxito, redirigir, etc.
-    
     } catch (error) {
-      console.log('Error al finalizar la compra:', error);
+      console.log("Error al finalizar la compra:", error);
     }
-    
+  };
+
+  const handleIncrementItem = async (itemId) => {
+    try {
+      const infocartCookie = Cookies.get("infocart");
+      if (infocartCookie) {
+        const infocartData = JSON.parse(infocartCookie);
+        const cartId = infocartData["cart id"];
+
+        // Realiza la petición a la ruta "/cart/add"
+        await axiosInstance.post("/cart/add", {
+          id_cart: cartId,
+          id_producto: itemId,
+          cantidad: 1, // Incrementar en 1
+        });
+
+        // Actualiza los elementos del carrito después de la respuesta exitosa
+        const updatedCartItems = cartItems.map((item) => {
+          if (item.id_producto === itemId) {
+            const newCantidad = item.cantidad + 1;
+            const newSumaPrecio = newCantidad * item.valor_venta;
+
+            return {
+              ...item,
+              cantidad: newCantidad,
+              suma_precio: newSumaPrecio,
+            };
+          }
+          return item;
+        });
+        setCartItems(updatedCartItems);
+      }
+    } catch (error) {
+      console.log("Error al incrementar el artículo en el carrito:", error);
+    }
+  };
+
+  const totalAPagar = cartItems.reduce((total, item) => total + item.suma_precio, 0);
+
+  const localFalso = {
+    nombre: "Nombre del Local Falso",
+    direccion: "Dirección Falsa, Calle Falsa 123",
+    descripcion: "Descripción del Local Falso, lugar imaginario para entrega x paga.",
   };
 
   return (
-    <MDBContainer className='shoping-cart'>
+    <MDBContainer className="shoping-cart">
       <MDBRow className="justify-content-center">
         <MDBCol md="8">
           <MDBCard>
-            <MDBCardHeader className="text-center">Carrito de compras</MDBCardHeader>
+            <MDBCardHeader className="text-center">
+              Carrito de compras
+            </MDBCardHeader>
             <MDBCardBody>
               {cartItems.length === 0 ? (
                 <p>No hay elementos en el carrito.</p>
@@ -111,7 +175,9 @@ export const ShopingCart = () => {
                         <MDBCol md="9">
                           <MDBRow>
                             <MDBCol>
-                              <MDBTypography variant="h6">{item.nombre_producto}</MDBTypography>
+                              <MDBTypography variant="h6">
+                                {item.nombre_producto}
+                              </MDBTypography>
                             </MDBCol>
                           </MDBRow>
                           <MDBRow>
@@ -124,7 +190,9 @@ export const ShopingCart = () => {
                                   color="success"
                                   size="sm"
                                   className="ms-2"
-                                  onClick={() => handleIncreaseQuantity(item.id_producto)}
+                                  onClick={() =>
+                                    handleIncrementItem(item.id_producto)
+                                  }
                                 >
                                   <MDBIcon icon="plus" />
                                 </MDBBtn>
@@ -132,7 +200,9 @@ export const ShopingCart = () => {
                                   color="danger"
                                   size="sm"
                                   className="ms-2"
-                                  onClick={() => handleDecreaseQuantity(item.id_producto)}
+                                  onClick={() =>
+                                    handleDecrementItem(item.id_producto)
+                                  }
                                 >
                                   <MDBIcon icon="minus" />
                                 </MDBBtn>
@@ -167,6 +237,45 @@ export const ShopingCart = () => {
                   </select>
                 </MDBCol>
               </MDBRow>
+              {modoPago === "PCE" && (
+                <>
+                  <MDBRow className="mt-3">
+                    <MDBCol>
+                      <MDBTypography variant="h6">
+                        Datos del Local:
+                      </MDBTypography>
+                      <p>Nombre: {localFalso.nombre}</p>
+                      <p>Dirección: {localFalso.direccion}</p>
+                      <p>Descripción: {localFalso.descripcion}</p>
+                    </MDBCol>
+                  </MDBRow>
+                </>
+              )}
+              {modoPago === "transferencia" && showBankAccountInfo && (
+                <MDBRow className="mt-3">
+                  <MDBCol>
+                    <MDBCard>
+                      <MDBCardBody>
+                        <MDBTypography variant="h6">
+                          Datos Bancarios:
+                        </MDBTypography>
+                        <p>Banco: Banco Ficticio</p>
+                        <p>Número de cuenta: 1234567890</p>
+                        <p>Nombre del titular: Titular Ficticio</p>
+                      </MDBCardBody>
+                    </MDBCard>
+                  </MDBCol>
+                </MDBRow>
+              )}
+              {modoPago && (
+                <MDBRow className="mt-3">
+                  <MDBCol>
+                    <MDBTypography variant="h6">
+                      Total a pagar: ${totalAPagar}
+                    </MDBTypography>
+                  </MDBCol>
+                </MDBRow>
+              )}
               <MDBRow className="mt-3">
                 <MDBCol>
                   <MDBBtn color="primary" onClick={handleFinalizarCompra}>

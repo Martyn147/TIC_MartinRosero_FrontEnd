@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+
 import {
   MDBContainer,
   MDBRow,
@@ -79,23 +79,24 @@ export function EditProducts({ productId }) {
       };
 
       const response = await axiosInstance.put(
-        `/products/update`,
+        "/products/update",
         productData
       );
-      if (response.status === 200) {
+      if (formData.imagen) {
+        const imageData = new FormData();
+        imageData.append('file', formData.imagen);
+        imageData.append('id_producto', parseInt(idProduct));
+
+        await axiosInstance.post('/image/upload', imageData);
+        console.log('Imagen del producto actualizada exitosamente');
+      }
+      if (response.status === 201) {
         console.log('Producto actualizado con ID:', productId);
 
         // Aquí puedes realizar cualquier lógica adicional después de actualizar el producto
         // ...
 
-        if (formData.imagen) {
-          const imageData = new FormData();
-          imageData.append('file', formData.imagen);
-          imageData.append('id_producto', productId);
 
-          await axiosInstance.post('/api/image/upload', imageData);
-          console.log('Imagen del producto actualizada exitosamente');
-        }
 
         setFormData({
           id_categoria: '',

@@ -4,19 +4,16 @@ import '../Header/style.css';
 import { Link, useNavigate } from 'react-router-dom';
 import 'boxicons';
 import Cookies from 'js-cookie';
-import axios from 'axios';
 import axiosInstance from '../axiosInstance';
 import './style.css';
 
 export const Header = () => {
-
   const deleteAllCookies = () => {
     const cookies = Cookies.get();
     for (const cookie in cookies) {
       Cookies.remove(cookie);
     }
   };
-  
 
   const isAuthenticated = !!Cookies.get('registro');
   const [itemTotal, setItemTotal] = useState(0);
@@ -29,13 +26,11 @@ export const Header = () => {
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
           const cartId = infocartData['cart id'];
-        
+
           const response = await axiosInstance.get(`/cart?id=${cartId}`);
           const productsCount = response.data.length;
           setItemTotal(productsCount);
         }
-   
-        
       } catch (error) {
         console.log('Error al obtener el número de productos del carrito:', error);
       }
@@ -45,12 +40,11 @@ export const Header = () => {
   }, []);
 
   const handleLogout = async () => {
-
     try {
       const token = Cookies.get('token');
       if (token) {
-      await axiosInstance.post('/logout');
-      deleteAllCookies();
+        await axiosInstance.post('/logout');
+        deleteAllCookies();
         navigate('/'); // Redirigir a la ruta de inicio
         console.log('Fuera del sistema');
       } else {
@@ -68,8 +62,9 @@ export const Header = () => {
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
           const cartId = infocartData['cart id'];
-        
-          axiosInstance.get(`/cart?id=${cartId}`)
+
+          axiosInstance
+            .get(`/cart?id=${cartId}`)
             .then((response) => {
               const productsCount = response.data.length;
               setItemTotal(productsCount);
@@ -78,7 +73,6 @@ export const Header = () => {
               console.log('Error al obtener el número de productos del carrito:', error);
             });
         }
-        
       } catch (error) {
         console.log('Error al obtener el número de productos del carrito:', error);
       }
@@ -95,6 +89,7 @@ export const Header = () => {
 
   const idRoleCookie = Cookies.get('idRole');
   const showAdministrarProductosOption = idRoleCookie === '1';
+  const showAdministrarCuentasOption = idRoleCookie === '0' || idRoleCookie === '1';
   const showProductosOption = idRoleCookie === '3';
   const showCartSection = idRoleCookie === '3';
 
@@ -118,17 +113,29 @@ export const Header = () => {
             <Link to="/IndexProducts">Administrar productos</Link>
           </li>
         )}
+        {showAdministrarCuentasOption && (
+          <li>
+            <Link to="/IndexAcontsAdmins">Administrar Cuentas</Link>
+          </li>
+        )}
         {showProductosOption && (
           <li>
             <Link to="/productos">PRODUCTOS</Link>
           </li>
         )}
         {isAuthenticated ? (
-          <li>
-            <Link to="/" onClick={handleLogout} style={{ paddingRight: '20px' }}>
-              SALIR
-            </Link>
-          </li>          
+          <>
+            {/* Opción "Mi Perfil" */}
+            <li>
+              <Link to="/myProfile">MI PERFIL</Link>
+            </li>
+            {/* Opción "Salir" */}
+            <li>
+              <Link to="/" onClick={handleLogout} style={{ paddingRight: '20px' }}>
+                SALIR
+              </Link>
+            </li>
+          </>
         ) : (
           <>
             <li>
@@ -140,15 +147,19 @@ export const Header = () => {
           </>
         )}
       </ul>
- 
-        <div className="cart">
+
+      <div className="cart">
         {showCartSection && (
-          <><box-icon name="cart"></box-icon><span className="item__total">
-            <Link to="/mycart">{itemTotal}</Link>
-          </span></>
-          )}
-        </div>
-   
+          <>
+            <box-icon name="cart"></box-icon>
+            <span className="item__total">
+              <Link to="/mycart">{itemTotal}</Link>
+            </span>
+          </>
+        )}
+      </div>
     </header>
   );
 };
+
+export default Header;
