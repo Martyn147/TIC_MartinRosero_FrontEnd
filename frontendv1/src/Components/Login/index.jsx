@@ -86,7 +86,7 @@ export const Login = () => {
           // El inicio de sesión fue exitoso y se recibió un token de acceso
           console.log("Inicio de sesión exitoso");
 
-          // Establecer cookie con el token de acceso
+          // Establecer cookies con informacion necesaria
         
           Cookies.set('token', response.data.access_token, { path: '/' });
           Cookies.set('registro', JSON.stringify(response.data));
@@ -176,9 +176,7 @@ export const Login = () => {
                 <MDBBtn className="mb-4 w-100 gradient-custom-2" type="submit">
                   Ingresar
                 </MDBBtn>
-                <a className="text-muted" href="#!">
-                  ¿Olvidó su Contraseña?
-                </a>
+  
               </div>
 
               <div className="login-link-container">

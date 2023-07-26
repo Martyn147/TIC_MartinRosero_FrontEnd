@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
-
+import axiosInstance from '../axiosInstance';
 import {
   MDBContainer,
   MDBRow,
   MDBCol,
   MDBInput,
   MDBBtn,
+  MDBCard,
+  MDBCardBody,
+  MDBCardImage,
+  MDBCardTitle,
+  MDBCardText,
+  MDBCardFooter,
+  MDBIcon,
 } from 'mdb-react-ui-kit';
-import './style.css';
-import axiosInstance from '../axiosInstance';
 import { useLocation } from 'react-router-dom';
 
-export function EditProducts({ productId }) {
+import './style.css';
+
+export function EditProducts() {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
-  const idProduct = searchParams.get('id'); //ya tiene el valor
+  const idProduct = searchParams.get('id');
 
   const [formData, setFormData] = useState({
     id_categoria: '',
@@ -25,16 +32,20 @@ export function EditProducts({ productId }) {
     imagen: null,
   });
 
+  const [images, setImages] = useState([]);
+
   useEffect(() => {
     const fetchProductData = async () => {
       try {
         const productsData = {
           id: parseInt(idProduct),
         };
-  
-        const response = await axiosInstance.get("/products/find", { params: productsData });
+
+        const response = await axiosInstance.get('/products/find', {
+          params: productsData,
+        });
         const productData = response.data;
-  
+
         setFormData({
           id_categoria: productData.id_categoria.toString(),
           nombre: productData.nombre_producto,
@@ -47,8 +58,20 @@ export function EditProducts({ productId }) {
         console.log(error);
       }
     };
-  
+
+    const getProductImages = async () => {
+      try {
+        const response = await axiosInstance.get('/image/show', {
+          params: { id_producto: parseInt(idProduct) },
+        });
+        setImages(response.data[0]); // La respuesta está dentro de un array, así que asignamos el primer elemento a "images"
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
     fetchProductData();
+    getProductImages();
   }, [idProduct]);
 
   const handleInputChange = (event) => {
@@ -78,25 +101,12 @@ export function EditProducts({ productId }) {
         valor_venta: formattedValor,
       };
 
-      const response = await axiosInstance.put(
-        "/products/update",
-        productData
-      );
-      if (formData.imagen) {
-        const imageData = new FormData();
-        imageData.append('file', formData.imagen);
-        imageData.append('id_producto', parseInt(idProduct));
-
-        await axiosInstance.post('/image/upload', imageData);
-        console.log('Imagen del producto actualizada exitosamente');
-      }
+      const response = await axiosInstance.put('/products/update', productData);
       if (response.status === 201) {
-        console.log('Producto actualizado con ID:', productId);
+        console.log('Producto actualizado con ID:', idProduct);
 
         // Aquí puedes realizar cualquier lógica adicional después de actualizar el producto
         // ...
-
-
 
         setFormData({
           id_categoria: '',
@@ -107,6 +117,53 @@ export function EditProducts({ productId }) {
           imagen: null,
         });
       }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDeleteImage = async (imageId) => {
+    try {
+      const imageToDelete = images.find((image) => image.id === imageId);
+      if (!imageToDelete) {
+        console.log('Imagen no encontrada');
+        return;
+      }
+
+      await axiosInstance.delete('/image/delete', {
+        data: { cloudinary_id: imageToDelete.cloudinary_public_id },
+      });
+
+      console.log('Imagen eliminada con ID:', imageId);
+
+      // Actualizar la lista de imágenes
+      const newImages = images.filter((image) => image.id !== imageId);
+      setImages(newImages);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleUploadImage = async () => {
+    try {
+      if (!formData.imagen) {
+        console.log('No se ha seleccionado ninguna imagen');
+        return;
+      }
+  
+      const imageData = new FormData();
+      imageData.append('file', formData.imagen);
+  
+      // Enviar el ID del producto como parte de la URL
+      await axiosInstance.post(`/image/upload/${idProduct}`, imageData);
+  
+      console.log('Imagen del producto guardada exitosamente');
+  
+      // Actualizar la lista de imágenes
+      const response = await axiosInstance.get('/image/show', {
+        params: { id_producto: parseInt(idProduct) },
+      });
+      setImages(response.data[0]);
     } catch (error) {
       console.log(error);
     }
@@ -200,6 +257,53 @@ export function EditProducts({ productId }) {
         </MDBRow>
         <MDBBtn type="submit">Actualizar Producto</MDBBtn>
       </form>
+
+      <div className="my-4">
+        <h2>Editar Imágenes</h2>
+        <div className="d-flex">
+          <input
+            type="file"
+            name="imagen"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          <MDBBtn color="primary" onClick={handleUploadImage}>
+            Guardar Imagen
+          </MDBBtn>
+        </div>
+      </div>
+
+      <MDBRow className="mt-5">
+  {images.map((image) => (
+    <MDBCol md="4" key={image.id} className="mb-4">
+      <MDBCard>
+        <MDBCardImage
+          src={image.cloudinary_url}
+          alt={formData.nombre}
+          style={{
+            maxWidth: '200px',
+            height: '200px',
+            objectFit: 'cover',
+            margin: '0 auto', // Para centrar horizontalmente
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center', // Para centrar verticalmente
+          }}
+        />
+        <MDBCardBody>
+          <MDBCardTitle>{formData.nombre}</MDBCardTitle>
+          <MDBCardText>{formData.detalle}</MDBCardText>
+          <MDBBtn color="danger" onClick={() => handleDeleteImage(image.id)}>
+            <MDBIcon icon="trash" />
+          </MDBBtn>
+        </MDBCardBody>
+        <MDBCardFooter>
+          <small className="text-muted">Actualizado: {image.updated_at}</small>
+        </MDBCardFooter>
+      </MDBCard>
+    </MDBCol>
+  ))}
+</MDBRow>
     </MDBContainer>
   );
 }

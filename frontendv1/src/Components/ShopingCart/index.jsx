@@ -22,6 +22,8 @@ export const ShopingCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [modoPago, setModoPago] = useState("");
   const [showBankAccountInfo, setShowBankAccountInfo] = useState(false);
+  const [profileInfo, setProfileInfo] = useState(null);
+  const [isProfileIncomplete, setIsProfileIncomplete] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -41,6 +43,27 @@ export const ShopingCart = () => {
 
     fetchCartItems();
   }, []);
+
+  useEffect(() => {
+    const fetchProfileInfo = async () => {
+      try {
+        const response = await axiosInstance.get("/profile");
+        setProfileInfo(response.data[0]);
+      } catch (error) {
+        console.log("Error al obtener la información del perfil:", error);
+      }
+    };
+
+    fetchProfileInfo();
+  }, []);
+
+  useEffect(() => {
+    if (profileInfo && profileInfo.direccion === null) {
+      setIsProfileIncomplete(true);
+    } else {
+      setIsProfileIncomplete(false);
+    }
+  }, [profileInfo]);
 
   const handleDecrementItem = async (itemId) => {
     try {
@@ -82,7 +105,6 @@ export const ShopingCart = () => {
   const handleModoPagoChange = (e) => {
     setModoPago(e.target.value);
 
-    // Si la opción seleccionada es "transferencia", mostramos la sección con datos falsos de la cuenta bancaria
     if (e.target.value === "transferencia") {
       setShowBankAccountInfo(true);
     } else {
@@ -92,15 +114,21 @@ export const ShopingCart = () => {
 
   const handleFinalizarCompra = async () => {
     try {
-      const response = await axiosInstance.post("/orders/create", {
-        modo_pago: modoPago,
-      });
-      Cookies.remove("carrito");
-      Cookies.remove("infocart");
-      navigate("/");
-      window.location.reload();
-
-      // Realiza cualquier acción adicional después de finalizar la compra, como mostrar un mensaje de éxito, redirigir, etc.
+      if (isProfileIncomplete) {
+        console.log(
+          "Por favor diríjase a su perfil y complete su información."
+        );
+      } else if (!modoPago) {
+        console.log("Aun no ha seleccionado su método de pago.");
+      } else {
+        const response = await axiosInstance.post("/orders/create", {
+          modo_pago: modoPago,
+        });
+        Cookies.remove("carrito");
+        Cookies.remove("infocart");
+        navigate("/");
+        window.location.reload();
+      }
     } catch (error) {
       console.log("Error al finalizar la compra:", error);
     }
@@ -141,12 +169,16 @@ export const ShopingCart = () => {
     }
   };
 
-  const totalAPagar = cartItems.reduce((total, item) => total + item.suma_precio, 0);
+  const totalAPagar = cartItems
+    .map((item) => parseFloat(item.suma_precio))
+    .reduce((total, price) => total + price, 0)
+    .toFixed(2);
 
   const localFalso = {
     nombre: "Nombre del Local Falso",
     direccion: "Dirección Falsa, Calle Falsa 123",
-    descripcion: "Descripción del Local Falso, lugar imaginario para entrega x paga.",
+    descripcion:
+      "Descripción del Local Falso, lugar imaginario para entrega x paga.",
   };
 
   return (
@@ -154,9 +186,10 @@ export const ShopingCart = () => {
       <MDBRow className="justify-content-center">
         <MDBCol md="8">
           <MDBCard>
-            <MDBCardHeader className="text-center">
-              Carrito de compras
+            <MDBCardHeader className="text-center" variant="h4" tag="h4">
+              <strong>Mi Carrito</strong>
             </MDBCardHeader>
+
             <MDBCardBody>
               {cartItems.length === 0 ? (
                 <p>No hay elementos en el carrito.</p>
@@ -167,7 +200,7 @@ export const ShopingCart = () => {
                       <MDBRow className="align-items-center">
                         <MDBCol md="3">
                           <MDBCardImage
-                            src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Products/belt.webp"
+                            src={item.cloudinary_url}
                             alt={item.nombre_producto}
                             position="top"
                           />
@@ -278,9 +311,33 @@ export const ShopingCart = () => {
               )}
               <MDBRow className="mt-3">
                 <MDBCol>
-                  <MDBBtn color="primary" onClick={handleFinalizarCompra}>
+                <MDBBtn
+        color="primary"
+        onClick={handleFinalizarCompra}
+        disabled={isProfileIncomplete || !modoPago}
+      >
                     Finalizar Compra
                   </MDBBtn>
+                  {isProfileIncomplete && (
+                    <span
+                      style={{
+                        marginLeft: "10px",
+                        color: "red",
+                        fontStyle: "italic",
+                      }}
+                    >
+                      Por favor diríjase a su perfil y complete su información.
+                    </span>
+                  )}
+                  {!modoPago && (
+                    <span style={{
+                      marginLeft: "10px",
+                      color: "red",
+                      fontStyle: "italic",
+                    }}>
+                      Aun no ha seleccionado su método de pago.
+                    </span>
+                  )}
                 </MDBCol>
               </MDBRow>
             </MDBCardBody>

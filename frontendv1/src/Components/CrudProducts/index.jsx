@@ -18,9 +18,14 @@ import {
 } from "mdb-react-ui-kit";
 import "./style.css";
 
-import axiosInstance from '../axiosInstance';
+import axiosInstance from "../axiosInstance";
+import Pagination from "../Pagination";
 
 export function CrudProducts() {
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -37,11 +42,11 @@ export function CrudProducts() {
 
   useEffect(() => {
     filterProducts();
-  }, [formData.keyword, formData.category, products]);
+  }, [currentPage, formData.keyword, formData.category, products]);
 
   const fetchProducts = async () => {
     try {
-      const response = await axiosInstance.get('/products');
+      const response = await axiosInstance.get("/products");
       setProducts(response.data);
     } catch (error) {
       console.log(error);
@@ -65,7 +70,16 @@ export function CrudProducts() {
       );
     }
 
-    setFilteredProducts(filtered);
+    // Update the total pages
+    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+
+    const offset = (currentPage - 1) * itemsPerPage;
+    const pagedProducts = filtered.slice(offset, offset + itemsPerPage);
+    setFilteredProducts(pagedProducts);
+  };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   const handleInputChange = (event) => {
@@ -98,8 +112,6 @@ export function CrudProducts() {
       console.log(error);
     }
   };
-  
-  
 
   const categories = [
     { value: "", text: "Categorias" },
@@ -107,7 +119,6 @@ export function CrudProducts() {
     { value: "2", text: "Limpieza" },
     { value: "3", text: "Tecnologia" },
   ];
-
   return (
     <MDBContainer className="crud-list">
       <h1>Administracion de Productos</h1>
@@ -159,39 +170,47 @@ export function CrudProducts() {
             </tr>
           </MDBTableHead>
           <MDBTableBody>
-            {filteredProducts.map((product) => (
-              <tr key={product.id}>
-                <td className="text-center">{product.id}</td>
-                <td className="text-center">{product.id_categoria}</td>
-                <td className="text-center">
-                  <img
-                    src="https://mdbcdn.b-cdn.net/img/Photos/Horizontal/E-commerce/Products/belt.webp"
-                    alt={product.nombre_producto}
-                    style={{ width: "100px", height: "auto" }}
-                  />
-                </td>
-                <td className="text-center">{product.nombre_producto}</td>
-                <td className="text-center">{product.detalle}</td>
-                <td className="text-center">{product.stock_number}</td>
-                <td className="text-center">{product.valor_venta}</td>
-                <td className="text-center">
-                  <MDBBtn size="sm" onClick={() => handleEdit(product.id)}>
-                    Edit
-                  </MDBBtn>
-                  <MDBBtn
-                    size="sm"
-                    onClick={() => handleDelete(product)}
-                    className="ms-2"
-                    color="danger"
-                  >
-                    Delete
-                  </MDBBtn>
-                </td>
-              </tr>
-            ))}
-          </MDBTableBody>
+  {filteredProducts.map((product) => (
+    <tr key={product.id}>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>{product.id}</td>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>{product.id_categoria}</td>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>
+        {product.images.length > 0 && (
+          <img
+            src={product.images[0].cloudinary_url}
+            alt={product.nombre_producto}
+            style={{ width: "100px", height: "auto" }}
+          />
+        )}
+      </td>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>{product.nombre_producto}</td>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>{product.detalle}</td>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>{product.stock_number}</td>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>{product.valor_venta}</td>
+      <td className="text-center" style={{ verticalAlign: "middle" }}>
+        <MDBBtn size="sm" onClick={() => handleEdit(product.id)}>
+          Edit
+        </MDBBtn>
+        <MDBBtn
+          size="sm"
+          onClick={() => handleDelete(product)}
+          className="ms-2"
+          color="danger"
+        >
+          Delete
+        </MDBBtn>
+      </td>
+    </tr>
+  ))}
+</MDBTableBody>
         </MDBTable>
       </MDBTable>
+
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
 
       <MDBModal
         show={isDeleteModalOpen}
@@ -199,29 +218,29 @@ export function CrudProducts() {
       >
         <MDBModalDialog>
           <MDBModalContent>
-
-          <MDBModalHeader>Eliminar Producto</MDBModalHeader>
-        <MDBModalBody>
-          <p>El siguiente producto sera eliminado en su totalidad</p>
-          {productToDelete && (
-            <div>
-              <p>ID: {productToDelete.id}</p>
-              <p>Nombre: {productToDelete.nombre_producto}</p>
-            </div>
-          )}
-        </MDBModalBody>
-        <MDBModalFooter>
-          <MDBBtn color="secondary" onClick={() => setIsDeleteModalOpen(false)}>
-            Cancel
-          </MDBBtn>
-          <MDBBtn color="danger" onClick={confirmDelete}>
-            Delete
-          </MDBBtn>
-        </MDBModalFooter>
-
+            <MDBModalHeader>Eliminar Producto</MDBModalHeader>
+            <MDBModalBody>
+              <p>El siguiente producto sera eliminado en su totalidad</p>
+              {productToDelete && (
+                <div>
+                  <p>ID: {productToDelete.id}</p>
+                  <p>Nombre: {productToDelete.nombre_producto}</p>
+                </div>
+              )}
+            </MDBModalBody>
+            <MDBModalFooter>
+              <MDBBtn
+                color="secondary"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
+                Cancel
+              </MDBBtn>
+              <MDBBtn color="danger" onClick={confirmDelete}>
+                Delete
+              </MDBBtn>
+            </MDBModalFooter>
           </MDBModalContent>
         </MDBModalDialog>
-        
       </MDBModal>
     </MDBContainer>
   );

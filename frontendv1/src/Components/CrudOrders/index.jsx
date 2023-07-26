@@ -1,38 +1,36 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../axiosInstance';
 import {
   MDBContainer,
   MDBTable,
   MDBTableHead,
   MDBTableBody,
   MDBBtn,
-  MDBInputGroup,
-  MDBRow,
-  MDBCol,
   MDBInput,
   MDBModal,
   MDBModalHeader,
   MDBModalBody,
   MDBModalFooter,
-  MDBModalDialog,
+  MDBRow,
+  MDBCol,
   MDBModalContent,
-} from "mdb-react-ui-kit";
-import "./style.css";
+  MDBModalDialog,
 
-import axiosInstance from '../axiosInstance';
+} from 'mdb-react-ui-kit';
+import Pagination from '../Pagination';
 
-export function CrudOrders() {
-  const navigate = useNavigate();
+export const CrudOrders = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [formData, setFormData] = useState({
-    keyword: "",
-    category: "",
-    status: "", // Nuevo campo para filtrar por estado
+    keyword: '',
+    category: '',
+    status: '',
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchOrders();
@@ -40,7 +38,7 @@ export function CrudOrders() {
 
   useEffect(() => {
     filterOrders();
-  }, [formData.keyword, formData.category, formData.status, orders]);
+  }, [formData.keyword, formData.category, formData.status, orders, currentPage]);
 
   const fetchOrders = async () => {
     try {
@@ -56,16 +54,12 @@ export function CrudOrders() {
 
     if (formData.keyword) {
       filtered = filtered.filter((order) =>
-        order.nombres
-          .toLowerCase()
-          .includes(formData.keyword.toLowerCase())
+        order.nombres.toLowerCase().includes(formData.keyword.toLowerCase())
       );
     }
 
     if (formData.category) {
-      filtered = filtered.filter(
-        (order) => order.id === parseInt(formData.category)
-      );
+      filtered = filtered.filter((order) => order.id === parseInt(formData.category));
     }
 
     if (formData.status) {
@@ -74,7 +68,14 @@ export function CrudOrders() {
       );
     }
 
-    setFilteredOrders(filtered);
+    const itemsPerPage = 5;
+    const totalItems = filtered.length;
+    const pages = Math.ceil(totalItems / itemsPerPage);
+    setTotalPages(pages);
+
+    const offset = (currentPage - 1) * itemsPerPage;
+    const pagedOrders = filtered.slice(offset, offset + itemsPerPage);
+    setFilteredOrders(pagedOrders);
   };
 
   const handleInputChange = (event) => {
@@ -86,8 +87,7 @@ export function CrudOrders() {
 
   const handleEdit = (id) => {
     // Handle edit logic here
-    navigate(`/EditOrder?id=${id}`);
-    console.log("Edit order:", id);
+    console.log('Edit order:', id);
   };
 
   const handleDelete = (order) => {
@@ -98,7 +98,7 @@ export function CrudOrders() {
   const confirmDelete = async () => {
     try {
       const data = { id_user: orderToDelete.id };
-      await axiosInstance.delete("/orders/delete", {
+      await axiosInstance.delete('/orders/delete', {
         data: data,
       });
       fetchOrders();
@@ -109,15 +109,18 @@ export function CrudOrders() {
   };
 
   const statuses = [
-    { value: "", text: "Todos los Estados" },
-    { value: "pendiente", text: "Pendiente" },
-    { value: "entregado", text: "Entregado" },
+    { value: '', text: 'Todos los Estados' },
+    { value: 'pendiente', text: 'Pendiente' },
+    { value: 'entregado', text: 'Entregado' },
   ];
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <MDBContainer className="crud-list">
       <h1>Administracion de Pedidos</h1>
-
       <MDBRow className="lista pt-3">
         <MDBCol md="6" className="mb-4">
           <MDBInput
@@ -147,54 +150,54 @@ export function CrudOrders() {
         </MDBCol>
       </MDBRow>
 
-      <Link to="/CreateOrder" className="btn btn-primary mb-4">
-        Añadir Pedido
-      </Link>
-
       <MDBTable responsive>
-        <MDBTable>
-          <MDBTableHead>
-            <tr>
-              <th className="text-center">ID</th>
-              <th className="text-center">Nombres</th>
-              <th className="text-center">Apellidos</th>
-              <th className="text-center">Direccion</th>
-              <th className="text-center">Valor Total</th>
-              <th className="text-center">Modo de Pago</th>
-              <th className="text-center">Estado</th>
-              <th className="text-center">Acciones</th>
+        <MDBTableHead>
+          <tr>
+            <th className="text-center">ID</th>
+            <th className="text-center">Nombres</th>
+            <th className="text-center">Apellidos</th>
+            <th className="text-center">Direccion</th>
+            <th className="text-center">Valor Total</th>
+            <th className="text-center">Modo de Pago</th>
+            <th className="text-center">Estado</th>
+            <th className="text-center">Acciones</th>
+          </tr>
+        </MDBTableHead>
+        <MDBTableBody>
+          {filteredOrders.map((order) => (
+            <tr key={order.id}>
+              <td className="text-center">{order.id}</td>
+              <td className="text-center">{order.nombres}</td>
+              <td className="text-center">{order.apellidos}</td>
+              <td className="text-center">{order.direccion}</td>
+              <td className="text-center">{order.valor_total}</td>
+              <td className="text-center">{order.modo_pago}</td>
+              <td className="text-center">{order.estado}</td>
+              <td className="text-center">
+                <MDBBtn size="sm" onClick={() => handleEdit(order.id)}>
+                  Editar
+                </MDBBtn>
+                <MDBBtn
+                  size="sm"
+                  onClick={() => handleDelete(order)}
+                  className="ms-2"
+                  color="danger"
+                >
+                  Eliminar
+                </MDBBtn>
+              </td>
             </tr>
-          </MDBTableHead>
-          <MDBTableBody>
-            {filteredOrders.map((order) => (
-              <tr key={order.id}>
-                <td className="text-center">{order.id}</td>
-                <td className="text-center">{order.nombres}</td>
-                <td className="text-center">{order.apellidos}</td>
-                <td className="text-center">{order.direccion}</td>
-                <td className="text-center">{order.valor_total}</td>
-                <td className="text-center">{order.modo_pago}</td>
-                <td className="text-center">{order.estado}</td>
-                <td className="text-center">
-                  <MDBBtn size="sm" onClick={() => handleEdit(order.id)}>
-                    Editar
-                  </MDBBtn>
-                  <MDBBtn
-                    size="sm"
-                    onClick={() => handleDelete(order)}
-                    className="ms-2"
-                    color="danger"
-                  >
-                    Eliminar
-                  </MDBBtn>
-                </td>
-              </tr>
-            ))}
-          </MDBTableBody>
-        </MDBTable>
+          ))}
+        </MDBTableBody>
       </MDBTable>
 
-      <MDBModal
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
+      />
+
+       <MDBModal
         show={isDeleteModalOpen}
         onHide={() => setIsDeleteModalOpen(false)}
       >
@@ -226,6 +229,6 @@ export function CrudOrders() {
       </MDBModal>
     </MDBContainer>
   );
-}
+};
 
 export default CrudOrders;

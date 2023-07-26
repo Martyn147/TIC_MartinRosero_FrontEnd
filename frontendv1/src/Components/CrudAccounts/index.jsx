@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import axiosInstance from "../axiosInstance";
-import { MDBContainer, MDBRow, MDBCol, MDBInput, MDBBtn, MDBTable, MDBTableHead, MDBTableBody, MDBModal, MDBModalDialog, MDBModalContent, MDBModalHeader, MDBModalBody, MDBModalFooter } from "mdb-react-ui-kit";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import axiosInstance from '../axiosInstance';
+import { MDBContainer, MDBTable, MDBTableHead, MDBTableBody, MDBBtn, MDBModal, MDBModalHeader, MDBModalBody, MDBModalFooter, MDBModalDialog, MDBModalContent } from 'mdb-react-ui-kit';
+import { Link, useLocation } from 'react-router-dom';
 import SuccessMessage from '../SuccessMessage';
+import Pagination from '../Pagination';
 
 export const CrudAccounts = () => {
   const [accounts, setAccounts] = useState([]);
@@ -12,6 +13,8 @@ export const CrudAccounts = () => {
   const [successMessage, setSuccessMessage] = useState(null); // Nuevo estado para el mensaje de éxito
 
   const location = useLocation();
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     fetchAccounts();
@@ -20,20 +23,17 @@ export const CrudAccounts = () => {
   useEffect(() => {
     // Mostrar mensaje de éxito cuando se regrese de la página "/CreateAccount"
     if (location.state && location.state.fromCreateAccount) {
-      setSuccessMessage("La cuenta ha sido creada con éxito");
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
+      setSuccessMessage('La cuenta ha sido creada con éxito');
     }
   }, [location]);
 
   const fetchAccounts = async () => {
     try {
-      const response = await axiosInstance.get("/accounts");
+      const response = await axiosInstance.get('/accounts');
       setAccounts(response.data);
       setLoading(false);
     } catch (error) {
-      console.error("Error al obtener las cuentas:", error);
+      console.error('Error al obtener las cuentas:', error);
       setLoading(false);
     }
   };
@@ -46,33 +46,50 @@ export const CrudAccounts = () => {
   const confirmDelete = async () => {
     if (accountToDelete) {
       try {
-        await axiosInstance.delete("/deleteAccount", {
+        await axiosInstance.delete('/deleteAccount', {
           data: {
-            id_user: accountToDelete.id
-          }
+            id_user: accountToDelete.id,
+          },
         });
 
         setAccounts((prevAccounts) => prevAccounts.filter((account) => account.id !== accountToDelete.id));
         setIsDeleteModalOpen(false);
 
-        setSuccessMessage("La cuenta ha sido eliminada con éxito"); // Mostrar mensaje de éxito al eliminar
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 3000);
+        // Mostrar mensaje de éxito al eliminar la cuenta
+        setSuccessMessage('La cuenta ha sido eliminada con éxito');
       } catch (error) {
-        console.error("Error al eliminar la cuenta:", error);
+        console.error('Error al eliminar la cuenta:', error);
       }
     }
   };
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
+  useEffect(() => {
+    filterAccounts();
+  }, [currentPage, accounts]);
+
+  const filterAccounts = () => {
+    const itemsPerPage = 5;
+    const totalItems = accounts.length;
+    const pages = Math.ceil(totalItems / itemsPerPage);
+    setTotalPages(pages);
+
+    const offset = (currentPage - 1) * itemsPerPage;
+    const pagedAccounts = accounts.slice(offset, offset + itemsPerPage);
+    setFilteredAccounts(pagedAccounts);
+  };
+
+  const [filteredAccounts, setFilteredAccounts] = useState([]);
 
   return (
     <MDBContainer className="crud-list">
       <h1>Administración de Cuentas</h1>
 
       {/* Mostrar mensaje de éxito */}
-      {successMessage && (
-        <SuccessMessage message={successMessage} duration={3000} />
-      )}
+      {successMessage && <SuccessMessage message={successMessage} onClose={() => setSuccessMessage(null)} />}
 
       <Link to="/CreateAccount" className="btn btn-primary mb-4">
         Añadir Cuenta
@@ -90,14 +107,18 @@ export const CrudAccounts = () => {
         <MDBTableBody>
           {loading ? (
             <tr>
-              <td colSpan="4" className="text-center">Cargando...</td>
+              <td colSpan="4" className="text-center">
+                Cargando...
+              </td>
             </tr>
-          ) : accounts.length === 0 ? (
+          ) : filteredAccounts.length === 0 ? (
             <tr>
-              <td colSpan="4" className="text-center">No hay cuentas disponibles.</td>
+              <td colSpan="4" className="text-center">
+                No hay cuentas disponibles.
+              </td>
             </tr>
           ) : (
-            accounts.map((account) => (
+            filteredAccounts.map((account) => (
               <tr key={account.id}>
                 <td className="text-center">{account.id}</td>
                 <td className="text-center">{account.email}</td>
@@ -112,6 +133,8 @@ export const CrudAccounts = () => {
           )}
         </MDBTableBody>
       </MDBTable>
+
+      <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
 
       <MDBModal show={isDeleteModalOpen} onHide={() => setIsDeleteModalOpen(false)}>
         <MDBModalDialog>

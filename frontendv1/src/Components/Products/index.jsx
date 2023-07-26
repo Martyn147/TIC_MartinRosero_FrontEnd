@@ -151,10 +151,8 @@ export function ProductsList() {
   };
 
   return (
-    <MDBContainer fluid className="Products my-5 text-center">
-      <h4 className="mt-4 mb-5">
-        <strong>Bestsellers</strong>
-      </h4>
+    <MDBContainer fluid className="Products text-center" style={{ marginTop: "145px"}}>
+      <h1 className="title" style={{paddingBottom:"50px"}}>Catalogo</h1>
 
       <MDBRow>
         <MDBCol md="6" className="mb-4">

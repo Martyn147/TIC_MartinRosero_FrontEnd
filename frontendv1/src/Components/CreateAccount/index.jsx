@@ -2,13 +2,18 @@ import React, { useState } from "react";
 import axiosInstance from "../axiosInstance";
 import { MDBContainer, MDBRow, MDBCol, MDBInput, MDBBtn } from "mdb-react-ui-kit";
 import { Link, useNavigate } from 'react-router-dom';
+import Cookies from 'js-cookie'; // Importar el paquete de cookies
 
 export const CreateAccount = () => {
+  // Obtener el valor del rol desde la cookie "idRole"
+  const idRoleFromCookie = Cookies.get('idRole');
+
+  // Definir el valor inicial del idRole en base a la cookie
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    idRole: 0, // Asignar el valor correspondiente al idRole del usuario actual
+    idRole: idRoleFromCookie === '0' ? 0 : 1, // Asignar el valor correspondiente al idRole del usuario actual
   });
 
   const [errors, setErrors] = useState({});

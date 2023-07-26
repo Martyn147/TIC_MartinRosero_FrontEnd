@@ -20,7 +20,7 @@ export const Home = () => {
   };
 
   return (
-    <div className="inicio" style={{ marginTop: "120px" }}>
+    <div className="inicio" style={{ marginTop: "120px", marginBottom:"250px" }}>
       <h1 className="title">Nuestros Productos</h1>
 
       <MDBRow className="row-cols-1 row-cols-md-3 g-5 m-2 mb-5">

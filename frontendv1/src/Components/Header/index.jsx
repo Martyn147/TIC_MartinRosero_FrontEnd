@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import canasta from '../../images/canasta.png';
-import '../Header/style.css';
-import { Link, useNavigate } from 'react-router-dom';
-import 'boxicons';
-import Cookies from 'js-cookie';
-import axiosInstance from '../axiosInstance';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  MDBNavbar,
+  MDBContainer,
+  MDBIcon,
+  MDBNavbarBrand,
+  MDBNavbarItem,
+  MDBNavbarLink,
+  MDBBadge,
+  MDBNavbarToggler,
+  MDBCollapse,
+} from "mdb-react-ui-kit";
+
+import "boxicons";
+import Cookies from "js-cookie";
+import axiosInstance from "../axiosInstance";
+import canasta from "../../images/canasta.png";
 import './style.css';
 
 export const Header = () => {
@@ -15,24 +26,27 @@ export const Header = () => {
     }
   };
 
-  const isAuthenticated = !!Cookies.get('registro');
+  const isAuthenticated = !!Cookies.get("registro");
   const [itemTotal, setItemTotal] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const infocartCookie = Cookies.get('infocart');
+        const infocartCookie = Cookies.get("infocart");
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
-          const cartId = infocartData['cart id'];
+          const cartId = infocartData["cart id"];
 
           const response = await axiosInstance.get(`/cart?id=${cartId}`);
           const productsCount = response.data.length;
           setItemTotal(productsCount);
         }
       } catch (error) {
-        console.log('Error al obtener el número de productos del carrito:', error);
+        console.log(
+          "Error al obtener el número de productos del carrito:",
+          error
+        );
       }
     };
 
@@ -41,27 +55,27 @@ export const Header = () => {
 
   const handleLogout = async () => {
     try {
-      const token = Cookies.get('token');
+      const token = Cookies.get("token");
       if (token) {
-        await axiosInstance.post('/logout');
+        await axiosInstance.post("/logout");
         deleteAllCookies();
-        navigate('/'); // Redirigir a la ruta de inicio
-        console.log('Fuera del sistema');
+        navigate("/"); // Redirigir a la ruta de inicio
+        console.log("Fuera del sistema");
       } else {
-        console.log('No se encontró el token de acceso');
+        console.log("No se encontró el token de acceso");
       }
     } catch (error) {
-      console.log('Error en el logout:', error);
+      console.log("Error en el logout:", error);
     }
   };
 
   useEffect(() => {
     const handleAddToCart = () => {
       try {
-        const infocartCookie = Cookies.get('infocart');
+        const infocartCookie = Cookies.get("infocart");
         if (infocartCookie) {
           const infocartData = JSON.parse(infocartCookie);
-          const cartId = infocartData['cart id'];
+          const cartId = infocartData["cart id"];
 
           axiosInstance
             .get(`/cart?id=${cartId}`)
@@ -70,94 +84,138 @@ export const Header = () => {
               setItemTotal(productsCount);
             })
             .catch((error) => {
-              console.log('Error al obtener el número de productos del carrito:', error);
+              console.log(
+                "Error al obtener el número de productos del carrito:",
+                error
+              );
             });
         }
       } catch (error) {
-        console.log('Error al obtener el número de productos del carrito:', error);
+        console.log(
+          "Error al obtener el número de productos del carrito:",
+          error
+        );
       }
     };
 
     // Escucha el evento 'addToCart' personalizado y llama a la función handleAddToCart
-    document.addEventListener('addToCart', handleAddToCart);
+    document.addEventListener("addToCart", handleAddToCart);
 
     // Limpia el evento cuando el componente se desmonta
     return () => {
-      document.removeEventListener('addToCart', handleAddToCart);
+      document.removeEventListener("addToCart", handleAddToCart);
     };
   }, []);
 
-  const idRoleCookie = Cookies.get('idRole');
-  const showAdministrarProductosOption = idRoleCookie === '1';
-  const showAdministrarCuentasOption = idRoleCookie === '0' || idRoleCookie === '1';
-  const showProductosOption = idRoleCookie === '3';
-  const showCartSection = idRoleCookie === '3';
+  const idRoleCookie = Cookies.get("idRole");
+  const showAdministrarProductosOption = idRoleCookie === "1";
+  const showAdministrarCuentasOption =
+    idRoleCookie === "0" || idRoleCookie === "1";
+  const showProductosOption = idRoleCookie === "3";
+  const showCartSection = idRoleCookie === "3";
+
+  // Estado para controlar la visibilidad del menú hamburguesa en pantallas pequeñas
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Función para alternar la visibilidad del menú hamburguesa
+  const toggleMenu = () => {
+    setIsMenuOpen((prevIsMenuOpen) => !prevIsMenuOpen);
+  };
+
+  // Cerrar el menú cuando el componente se monte
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, []);
 
   return (
     <header>
-      <Link to="/">
-        <div className="logo">
-          <img src={canasta} alt="logo" width="90" />
-        </div>
-      </Link>
+      <MDBNavbar expand="lg" light bgColor="white" scrolling fixed="top" >
+        <MDBContainer>
+          <MDBNavbarBrand href="/">
+            <img src={canasta} alt="logo" width="90" />
+          </MDBNavbarBrand>
 
-      <ul>
-        <li>
-          <Link to="/">INICIO</Link>
-        </li>
-        <li>
-          <Link to="/IndexOrders">Ordenes</Link>
-        </li>
-        {showAdministrarProductosOption && (
-          <li>
-            <Link to="/IndexProducts">Administrar productos</Link>
-          </li>
-        )}
-        {showAdministrarCuentasOption && (
-          <li>
-            <Link to="/IndexAcontsAdmins">Administrar Cuentas</Link>
-          </li>
-        )}
-        {showProductosOption && (
-          <li>
-            <Link to="/productos">PRODUCTOS</Link>
-          </li>
-        )}
-        {isAuthenticated ? (
-          <>
-            {/* Opción "Mi Perfil" */}
-            <li>
-              <Link to="/myProfile">MI PERFIL</Link>
-            </li>
-            {/* Opción "Salir" */}
-            <li>
-              <Link to="/" onClick={handleLogout} style={{ paddingRight: '20px' }}>
-                SALIR
+          <MDBNavbarToggler type="button" onClick={toggleMenu}>
+            <box-icon name="menu"></box-icon>
+          </MDBNavbarToggler>
+
+          <MDBCollapse navbar show={isMenuOpen}>
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <Link to="/" className="nav-link">
+                  INICIO
+                </Link>
+              </li>
+              {idRoleCookie === "2" && (
+                <li className="nav-item">
+                  <Link to="/IndexOrders" className="nav-link">
+                    ORDENES
+                  </Link>
+                </li>
+              )}
+              {showAdministrarProductosOption && (
+                <li className="nav-item">
+                  <Link to="/IndexProducts" className="nav-link">
+                    ADMINISTRAR PRODUCTOS
+                  </Link>
+                </li>
+              )}
+              {showAdministrarCuentasOption && (
+                <li className="nav-item">
+                  <Link to="/IndexAcontsAdmins" className="nav-link">
+                    ADMINISTRAR CUENTAS
+                  </Link>
+                </li>
+              )}
+              {showProductosOption && (
+                <li className="nav-item">
+                  <Link to="/productos" className="nav-link">
+                    PRODUCTOS
+                  </Link>
+                </li>
+              )}
+              {isAuthenticated ? (
+                <>
+                  <li className="nav-item">
+                    <Link to="/myProfile" className="nav-link">
+                      MI PERFIL
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/" className="nav-link" onClick={handleLogout}>
+                      SALIR
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="nav-item">
+                    <Link to="/login" className="nav-link">
+                      INGRESAR
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/register" className="nav-link">
+                      REGISTRATE
+                    </Link>
+                  </li>
+                </>
+              )}
+            </ul>
+
+            {showCartSection && (
+              <Link to="/mycart">
+                <MDBBadge pill color="danger" className="cart-badge">
+                  {itemTotal}
+                </MDBBadge>
+                <span className="cart-icon">
+                  <MDBIcon icon="shopping-cart" fas />
+                </span>
               </Link>
-            </li>
-          </>
-        ) : (
-          <>
-            <li>
-              <Link to="/login">INGRESAR</Link>
-            </li>
-            <li>
-              <Link to="/register">REGISTRATE</Link>
-            </li>
-          </>
-        )}
-      </ul>
-
-      <div className="cart">
-        {showCartSection && (
-          <>
-            <box-icon name="cart"></box-icon>
-            <span className="item__total">
-              <Link to="/mycart">{itemTotal}</Link>
-            </span>
-          </>
-        )}
-      </div>
+            )}
+          </MDBCollapse>
+        </MDBContainer>
+      </MDBNavbar>
     </header>
   );
 };

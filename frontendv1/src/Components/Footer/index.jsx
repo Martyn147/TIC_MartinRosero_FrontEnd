@@ -10,7 +10,11 @@ const Footer = () => {
           <MDBCol lg='6' md='12' className='mb-4 mb-md-0'>
             <h5 className='text-uppercase'>Contacto</h5>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis felis ac nunc aliquam semper.
+            Correo: PideXAqui@gmail.com
+              
+            </p>
+            <p>
+            Telefono: 099583920
             </p>
           </MDBCol>
           <MDBCol lg='3' md='6' className='mb-4 mb-md-0'>
