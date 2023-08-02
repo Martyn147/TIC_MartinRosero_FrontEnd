@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import axiosInstance from '../axiosInstance';
+import React, { useState, useEffect } from "react";
+import axiosInstance from "../axiosInstance";
 import {
   MDBContainer,
   MDBTable,
@@ -15,25 +15,24 @@ import {
   MDBCol,
   MDBModalContent,
   MDBModalDialog,
-} from 'mdb-react-ui-kit';
-import Pagination from '../Pagination';
-import { Link } from 'react-router-dom';
-
+} from "mdb-react-ui-kit";
+import Pagination from "../Pagination";
+import { Link } from "react-router-dom";
 
 export const CrudOrders = () => {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
   const [formData, setFormData] = useState({
-    keyword: '',
-    category: '',
-    status: '',
+    keyword: "",
+    category: "",
+    status: "",
   });
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [editingOrderId, setEditingOrderId] = useState(null);
-  const [newStatus, setNewStatus] = useState('');
+  const [newStatus, setNewStatus] = useState("");
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
@@ -42,11 +41,17 @@ export const CrudOrders = () => {
 
   useEffect(() => {
     filterOrders();
-  }, [formData.keyword, formData.category, formData.status, orders, currentPage]);
+  }, [
+    formData.keyword,
+    formData.category,
+    formData.status,
+    orders,
+    currentPage,
+  ]);
 
   const fetchOrders = async () => {
     try {
-      const response = await axiosInstance.get('/orders/list');
+      const response = await axiosInstance.get("/orders/list");
       setOrders(response.data);
     } catch (error) {
       console.log(error);
@@ -63,7 +68,9 @@ export const CrudOrders = () => {
     }
 
     if (formData.category) {
-      filtered = filtered.filter((order) => order.id === parseInt(formData.category));
+      filtered = filtered.filter(
+        (order) => order.id === parseInt(formData.category)
+      );
     }
 
     if (formData.status) {
@@ -101,7 +108,7 @@ export const CrudOrders = () => {
   const confirmDelete = async () => {
     try {
       const data = { id_user: orderToDelete.id };
-      await axiosInstance.delete('/orders/delete', {
+      await axiosInstance.delete("/orders/delete", {
         data: data,
       });
       fetchOrders();
@@ -112,9 +119,9 @@ export const CrudOrders = () => {
   };
 
   const statuses = [
-    { value: '', text: 'Todos los Estados' },
-    { value: 'pendiente', text: 'Pendiente' },
-    { value: 'entregado', text: 'Entregado' },
+    { value: "", text: "Todos los Estados" },
+    { value: "pendiente", text: "Pendiente" },
+    { value: "entregado", text: "Entregado" },
   ];
 
   const handlePageChange = (pageNumber) => {
@@ -134,7 +141,7 @@ export const CrudOrders = () => {
         estado: newStatus,
       };
 
-      await axiosInstance.put('/orders/state/update', requestData);
+      await axiosInstance.put("/orders/state/update", requestData);
       setIsConfirmModalOpen(false);
       setEditingOrderId(null);
       fetchOrders();
@@ -223,23 +230,23 @@ export const CrudOrders = () => {
                 )}
               </td>
               <td className="text-center">
-  <MDBBtn size="sm" onClick={() => handleEdit(order.id)}>
-    Editar
-  </MDBBtn>
-  <MDBBtn
-    size="sm"
-    onClick={() => handleDelete(order)}
-    className="ms-2"
-    color="danger"
-  >
-    Eliminar
-  </MDBBtn>
-  <Link to={`/MiPedido/${order.id}`}>
-    <MDBBtn size="sm" className="ms-2">
-      Detalle
-    </MDBBtn>
-  </Link>
-</td>
+                <MDBBtn size="sm" onClick={() => handleEdit(order.id)}>
+                  Editar
+                </MDBBtn>
+                <MDBBtn
+                  size="sm"
+                  onClick={() => handleDelete(order)}
+                  className="ms-2"
+                  color="danger"
+                >
+                  Eliminar
+                </MDBBtn>
+                <Link to={`/MiPedido/${order.id}`}>
+                  <MDBBtn size="sm" className="ms-2">
+                    Detalle
+                  </MDBBtn>
+                </Link>
+              </td>
             </tr>
           ))}
         </MDBTableBody>
@@ -251,7 +258,10 @@ export const CrudOrders = () => {
         onPageChange={handlePageChange}
       />
 
-      <MDBModal show={isDeleteModalOpen} onHide={() => setIsDeleteModalOpen(false)}>
+      <MDBModal
+        show={isDeleteModalOpen}
+        onHide={() => setIsDeleteModalOpen(false)}
+      >
         <MDBModalDialog>
           <MDBModalContent>
             <MDBModalHeader>Eliminar Pedido</MDBModalHeader>
@@ -265,7 +275,10 @@ export const CrudOrders = () => {
               )}
             </MDBModalBody>
             <MDBModalFooter>
-              <MDBBtn color="secondary" onClick={() => setIsDeleteModalOpen(false)}>
+              <MDBBtn
+                color="secondary"
+                onClick={() => setIsDeleteModalOpen(false)}
+              >
                 Cancelar
               </MDBBtn>
               <MDBBtn color="danger" onClick={confirmDelete}>
@@ -276,7 +289,10 @@ export const CrudOrders = () => {
         </MDBModalDialog>
       </MDBModal>
 
-      <MDBModal show={isConfirmModalOpen} onHide={() => setIsConfirmModalOpen(false)}>
+      <MDBModal
+        show={isConfirmModalOpen}
+        onHide={() => setIsConfirmModalOpen(false)}
+      >
         <MDBModalDialog>
           <MDBModalContent>
             <MDBModalHeader>Cambiar Estado del Pedido</MDBModalHeader>
@@ -290,7 +306,10 @@ export const CrudOrders = () => {
               )}
             </MDBModalBody>
             <MDBModalFooter>
-              <MDBBtn color="secondary" onClick={() => setIsConfirmModalOpen(false)}>
+              <MDBBtn
+                color="secondary"
+                onClick={() => setIsConfirmModalOpen(false)}
+              >
                 Cancelar
               </MDBBtn>
               <MDBBtn color="success" onClick={handleConfirmStatusChange}>

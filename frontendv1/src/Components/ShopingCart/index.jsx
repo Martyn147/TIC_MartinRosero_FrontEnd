@@ -25,6 +25,7 @@ export const ShopingCart = () => {
   const [profileInfo, setProfileInfo] = useState(null);
   const [isProfileIncomplete, setIsProfileIncomplete] = useState(false);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true); // Agrega el estado isLoading para la pantalla de carga
 
   useEffect(() => {
     const fetchCartItems = async () => {
@@ -39,9 +40,11 @@ export const ShopingCart = () => {
           // Si no existe la cookie "infocartCookie", realiza la petición GET a "/cart"
           const response = await axiosInstance.get("/cart");
           setCartItems(response.data);
+          setIsLoading(false);
         }
       } catch (error) {
         console.log("Error al obtener los elementos del carrito:", error);
+        setIsLoading(false);
       }
     };
 
@@ -53,8 +56,10 @@ export const ShopingCart = () => {
       try {
         const response = await axiosInstance.get("/profile");
         setProfileInfo(response.data[0]);
+        setIsLoading(false);
       } catch (error) {
         console.log("Error al obtener la información del perfil:", error);
+        setIsLoading(false);
       }
     };
 
@@ -70,6 +75,7 @@ export const ShopingCart = () => {
   }, [profileInfo]);
 
   const handleDecrementItem = async (itemId) => {
+    setIsLoading(true);
     try {
       const infocartCookie = Cookies.get("infocart");
       if (infocartCookie) {
@@ -101,8 +107,10 @@ export const ShopingCart = () => {
         });
         setCartItems(updatedCartItems);
       }
+      setIsLoading(false);
     } catch (error) {
       console.log("Error al decrementar el artículo en el carrito:", error);
+      setIsLoading(false);
     }
   };
 
@@ -139,6 +147,7 @@ export const ShopingCart = () => {
   };
 
   const handleIncrementItem = async (itemId) => {
+    setIsLoading(true);
     try {
       const infocartCookie = Cookies.get("infocart");
       if (infocartCookie) {
@@ -168,8 +177,10 @@ export const ShopingCart = () => {
         });
         setCartItems(updatedCartItems);
       }
+      setIsLoading(false);
     } catch (error) {
       console.log("Error al incrementar el artículo en el carrito:", error);
+      setIsLoading(false);
     }
   };
 
@@ -187,6 +198,13 @@ export const ShopingCart = () => {
 
   return (
     <MDBContainer className="shoping-cart">
+            {isLoading ? (
+        // Pantalla de carga mientras isLoading es true
+        <div className="text-center" style={{ paddingTop: "150px" }}>
+          Cargando...
+        </div>
+      ) : (
+        // Contenido normal de la página cuando isLoading es false
       <MDBRow className="justify-content-center">
         <MDBCol md="8">
           <MDBCard>
@@ -348,6 +366,7 @@ export const ShopingCart = () => {
           </MDBCard>
         </MDBCol>
       </MDBRow>
+      )}
     </MDBContainer>
   );
 };
