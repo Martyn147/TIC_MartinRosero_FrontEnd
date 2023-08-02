@@ -12,6 +12,9 @@
   import {CrudOrders} from "./CrudOrders"
   import {CrudAccounts} from "./CrudAccounts"
   import {CreateAccount} from "./CreateAccount"
+  import {OrderDetails} from "./OrderDetails"
+  
+
   
   export const Paginas = () => {
     return (
@@ -29,6 +32,7 @@
               <Route path='/IndexOrders' exact Component={CrudOrders}/>
               <Route path='/IndexAcontsAdmins' exact Component={CrudAccounts}/>
               <Route path='/CreateAccount' exact Component={CreateAccount}/>
+              <Route path="/MiPedido/:id" exact Component={OrderDetails}/>
 
           </Routes>
       </section>

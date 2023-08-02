@@ -15,9 +15,10 @@ import {
   MDBCol,
   MDBModalContent,
   MDBModalDialog,
-
 } from 'mdb-react-ui-kit';
 import Pagination from '../Pagination';
+import { Link } from 'react-router-dom';
+
 
 export const CrudOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -31,6 +32,9 @@ export const CrudOrders = () => {
   const [orderToDelete, setOrderToDelete] = useState(null);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editingOrderId, setEditingOrderId] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     fetchOrders();
@@ -86,8 +90,7 @@ export const CrudOrders = () => {
   };
 
   const handleEdit = (id) => {
-    // Handle edit logic here
-    console.log('Edit order:', id);
+    setEditingOrderId(id);
   };
 
   const handleDelete = (order) => {
@@ -116,6 +119,46 @@ export const CrudOrders = () => {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
+  };
+
+  const handleStatusChange = (event, order) => {
+    setNewStatus(event.target.value);
+    setIsConfirmModalOpen(true);
+    setOrderToDelete(order);
+  };
+
+  const handleConfirmStatusChange = async () => {
+    try {
+      const requestData = {
+        id_pedido: orderToDelete.id,
+        estado: newStatus,
+      };
+
+      await axiosInstance.put('/orders/state/update', requestData);
+      setIsConfirmModalOpen(false);
+      setEditingOrderId(null);
+      fetchOrders();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const renderStatusCombobox = (order) => {
+    return (
+      <select
+        name="status"
+        className="form-select"
+        aria-label="Status"
+        value={newStatus}
+        onChange={(event) => handleStatusChange(event, order)}
+      >
+        {statuses.map((status) => (
+          <option key={status.value} value={status.value}>
+            {status.text}
+          </option>
+        ))}
+      </select>
+    );
   };
 
   return (
@@ -172,20 +215,31 @@ export const CrudOrders = () => {
               <td className="text-center">{order.direccion}</td>
               <td className="text-center">{order.valor_total}</td>
               <td className="text-center">{order.modo_pago}</td>
-              <td className="text-center">{order.estado}</td>
               <td className="text-center">
-                <MDBBtn size="sm" onClick={() => handleEdit(order.id)}>
-                  Editar
-                </MDBBtn>
-                <MDBBtn
-                  size="sm"
-                  onClick={() => handleDelete(order)}
-                  className="ms-2"
-                  color="danger"
-                >
-                  Eliminar
-                </MDBBtn>
+                {editingOrderId === order.id ? (
+                  renderStatusCombobox(order)
+                ) : (
+                  <span>{order.estado}</span>
+                )}
               </td>
+              <td className="text-center">
+  <MDBBtn size="sm" onClick={() => handleEdit(order.id)}>
+    Editar
+  </MDBBtn>
+  <MDBBtn
+    size="sm"
+    onClick={() => handleDelete(order)}
+    className="ms-2"
+    color="danger"
+  >
+    Eliminar
+  </MDBBtn>
+  <Link to={`/MiPedido/${order.id}`}>
+    <MDBBtn size="sm" className="ms-2">
+      Detalle
+    </MDBBtn>
+  </Link>
+</td>
             </tr>
           ))}
         </MDBTableBody>
@@ -197,10 +251,7 @@ export const CrudOrders = () => {
         onPageChange={handlePageChange}
       />
 
-       <MDBModal
-        show={isDeleteModalOpen}
-        onHide={() => setIsDeleteModalOpen(false)}
-      >
+      <MDBModal show={isDeleteModalOpen} onHide={() => setIsDeleteModalOpen(false)}>
         <MDBModalDialog>
           <MDBModalContent>
             <MDBModalHeader>Eliminar Pedido</MDBModalHeader>
@@ -214,14 +265,36 @@ export const CrudOrders = () => {
               )}
             </MDBModalBody>
             <MDBModalFooter>
-              <MDBBtn
-                color="secondary"
-                onClick={() => setIsDeleteModalOpen(false)}
-              >
+              <MDBBtn color="secondary" onClick={() => setIsDeleteModalOpen(false)}>
                 Cancelar
               </MDBBtn>
               <MDBBtn color="danger" onClick={confirmDelete}>
                 Eliminar
+              </MDBBtn>
+            </MDBModalFooter>
+          </MDBModalContent>
+        </MDBModalDialog>
+      </MDBModal>
+
+      <MDBModal show={isConfirmModalOpen} onHide={() => setIsConfirmModalOpen(false)}>
+        <MDBModalDialog>
+          <MDBModalContent>
+            <MDBModalHeader>Cambiar Estado del Pedido</MDBModalHeader>
+            <MDBModalBody>
+              <p>¿Estás seguro de cambiar el estado del pedido?</p>
+              {orderToDelete && (
+                <div>
+                  <p>ID: {orderToDelete.id}</p>
+                  <p>Nombres: {orderToDelete.nombres}</p>
+                </div>
+              )}
+            </MDBModalBody>
+            <MDBModalFooter>
+              <MDBBtn color="secondary" onClick={() => setIsConfirmModalOpen(false)}>
+                Cancelar
+              </MDBBtn>
+              <MDBBtn color="success" onClick={handleConfirmStatusChange}>
+                Guardar Cambio
               </MDBBtn>
             </MDBModalFooter>
           </MDBModalContent>

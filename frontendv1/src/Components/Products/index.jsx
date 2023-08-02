@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import { useLocation } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import axiosInstance from '../axiosInstance';
@@ -12,15 +11,22 @@ import {
   MDBBtn,
   MDBIcon,
   MDBInput,
+  MDBCardText,
+  MDBCardTitle,
+  MDBBadge,
 } from 'mdb-react-ui-kit';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import './style.css';
+import SuccessMessage from '../SuccessMessage'; // Importa el componente SuccessMessage
+import { Link, useNavigate } from "react-router-dom";
 
 export function ProductsList() {
+  const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [error, setError] = useState(null); // Agrega el estado error
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -74,10 +80,20 @@ export function ProductsList() {
     return matchSearch && matchCategory;
   });
 
+  const [inputTouched, setInputTouched] = useState(false); // Nuevo estado para determinar si se ha interactuado con el input
+
   const addToCart = async (product) => {
+    setError(null); // Limpiar el mensaje de error
+
+    // Verificar si la cantidad seleccionada es válida
+    if (!inputTouched || product.cantidad === '' || product.cantidad === null || parseInt(product.cantidad) <= 0) {
+      setError('Por favor, seleccione una cantidad válida.');
+      return;
+    }
+
     // Verificar si la cantidad seleccionada supera el stock disponible
     if (parseInt(product.cantidad) > product.stock_number) {
-      console.log('La cantidad seleccionada supera el stock disponible');
+      setError('La cantidad seleccionada supera el stock disponible.');
       return;
     }
 
@@ -85,7 +101,7 @@ export function ProductsList() {
 
     // Redireccionar a la ventana de registro si no hay token
     if (!tokenCookie) {
-      window.location.href = '/register'; // Cambia '/registro' por la ruta de tu ventana de registro
+      navigate("/register"); // Cambia '/registro' por la ruta de tu ventana de registro
       return;
     }
 
@@ -151,8 +167,10 @@ export function ProductsList() {
   };
 
   return (
-    <MDBContainer fluid className="Products text-center" style={{ marginTop: "145px"}}>
-      <h1 className="title" style={{paddingBottom:"50px"}}>Catalogo</h1>
+    <MDBContainer fluid className="Products text-center" style={{ marginTop: '145px' }}>
+      <h1 className="title" style={{ paddingBottom: '50px' }}>
+        Catalogo
+      </h1>
 
       <MDBRow>
         <MDBCol md="6" className="mb-4">
@@ -179,7 +197,7 @@ export function ProductsList() {
           <MDBCol md="12" lg="4" className="mb-4" key={product.id}>
             <MDBCard>
               {/* Carrusel de imágenes */}
-              <Carousel showArrows={true} infiniteLoop={true}>
+              <Carousel showArrows={true} infiniteLoop={true} showStatus={false}>
                 {product.images.map((image) => (
                   <div key={image.id}>
                     <img
@@ -192,26 +210,47 @@ export function ProductsList() {
               </Carousel>
 
               <MDBCardBody>
-                <a href="#!" className="text-reset">
-                  <h5 className="card-title mb-3">{product.nombre_producto}</h5>
-                  <h6 className="mb-3">{product.detalle}</h6>
-                </a>
+                <MDBCardTitle>
+                  <a href="#!" className="text-reset text-decoration-none">
+                    {product.nombre_producto}
+                  </a>
+                </MDBCardTitle>
+                <MDBCardText>{product.detalle}</MDBCardText>
                 <h6 className="mb-3">${product.valor_venta}</h6>
+                <h6 className="mb-3">
+                  Stock disponible:{' '}
+                  <MDBBadge bg={product.stock_number > 0 ? 'success' : 'danger'}>
+                    {product.stock_number}
+                  </MDBBadge>
+                </h6>
 
-                <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex flex-column">
+                  <div className="mb-3">
                   <MDBInput
-                    type="number"
-                    min="1"
-                    max={product.stock_number}
-                    label="Cantidad"
-                    value={product.cantidad}
-                    onChange={(e) => {
-                      product.cantidad = e.target.value;
-                    }}
-                  />
+                      type="number"
+                      min="1"
+                      label="Cantidad"
+                      max={product.stock_number}
+               
+                      onChange={(e) => {
+                        // Solo actualizar el valor si la entrada no contiene "+" o "-"
+                        if (!e.target.value.includes('+') && !e.target.value.includes('-')) {
+                          product.cantidad = e.target.value;
+                        }
+                      }}
+                      onFocus={() => setInputTouched(true)} // Actualizar el estado al interactuar con el input
+                      
+                      onKeyDown={(e) => {
+                        // Evitar que se ingrese el signo "+" o "-"
+                        if (e.key === '+' || e.key === '-') {
+                          e.preventDefault();
+                        }
+                      }}
+                    />
+                  </div>
+
                   <MDBBtn color="success" onClick={() => addToCart(product)}>
-                    Añadir al carrito
-                    <MDBIcon icon="cart-plus" className="ms-2" />
+                    Añadir al carrito <MDBIcon icon="cart-plus" className="ms-2" />
                   </MDBBtn>
                 </div>
               </MDBCardBody>
@@ -219,6 +258,15 @@ export function ProductsList() {
           </MDBCol>
         ))}
       </MDBRow>
+
+      {/* Mostrar el componente SuccessMessage si hay un error */}
+      {error && (
+        <SuccessMessage
+          title="Error al agregar al carrito"
+          message={error}
+          onClose={() => setError(null)} // Limpiar el mensaje de error al cerrar el modal
+        />
+      )}
     </MDBContainer>
   );
 }

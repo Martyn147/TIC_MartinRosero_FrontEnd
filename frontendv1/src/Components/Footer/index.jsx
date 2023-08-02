@@ -48,7 +48,7 @@ const Footer = () => {
         </MDBRow>
       </MDBContainer>
       <div className='text-center p-3' style={{ backgroundColor: 'rgba(0, 0, 0, 0.2)' }}>
-        &copy; {new Date().getFullYear()} Nombre de tu empresa
+        &copy; {new Date().getFullYear()} Pide X Aqui
       </div>
     </MDBFooter>
   );

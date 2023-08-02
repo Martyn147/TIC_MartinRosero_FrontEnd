@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '../axiosInstance';
 import { MDBContainer, MDBRow, MDBCol, MDBCard, MDBCardBody, MDBIcon, MDBBtn, MDBInput, MDBListGroup, MDBListGroupItem } from 'mdb-react-ui-kit';
 import './style.css';
-
+import { Link } from 'react-router-dom';
 export const Profile = () => {
   const [profileData, setProfileData] = useState(null);
   const [editMode, setEditMode] = useState(false);
@@ -179,7 +179,13 @@ export const Profile = () => {
               <strong>Modo de Pago:</strong> {order.modo_pago}
               <br />
               <strong>Estado:</strong> {order.estado}
-            </MDBListGroupItem>
+              <br />
+                  <Link to={`/MiPedido/${order.id}`}>
+                    <MDBBtn color="primary" className="my-2">
+                      Detalles del pedido
+                    </MDBBtn>
+                  </Link>
+                </MDBListGroupItem>
             ))}
           </MDBListGroup>
         ) : (

@@ -245,16 +245,7 @@ export function EditProducts() {
             />
           </MDBCol>
         </MDBRow>
-        <MDBRow className="mb-3">
-          <MDBCol>
-            <input
-              type="file"
-              name="imagen"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-          </MDBCol>
-        </MDBRow>
+
         <MDBBtn type="submit">Actualizar Producto</MDBBtn>
       </form>
 

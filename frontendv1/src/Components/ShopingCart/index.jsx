@@ -35,6 +35,10 @@ export const ShopingCart = () => {
           const cartId = infocartData["cart id"];
           const response = await axiosInstance.get(`/cart?id=${cartId}`);
           setCartItems(response.data);
+        } else {
+          // Si no existe la cookie "infocartCookie", realiza la petición GET a "/cart"
+          const response = await axiosInstance.get("/cart");
+          setCartItems(response.data);
         }
       } catch (error) {
         console.log("Error al obtener los elementos del carrito:", error);

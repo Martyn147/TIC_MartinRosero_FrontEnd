@@ -160,13 +160,13 @@ export function CrudProducts() {
           <MDBTableHead>
             <tr>
               <th className="text-center">ID</th>
-              <th className="text-center">Category ID</th>
-              <th className="text-center">Image</th>
-              <th className="text-center">Name</th>
-              <th className="text-center">Detail</th>
+              <th className="text-center">Categoria ID</th>
+              <th className="text-center">Imagen</th>
+              <th className="text-center">Nombre</th>
+              <th className="text-center">Detalle</th>
               <th className="text-center">Stock</th>
-              <th className="text-center">Value</th>
-              <th className="text-center">Actions</th>
+              <th className="text-center">Valor</th>
+              <th className="text-center">Opciones</th>
             </tr>
           </MDBTableHead>
           <MDBTableBody>
@@ -189,7 +189,7 @@ export function CrudProducts() {
       <td className="text-center" style={{ verticalAlign: "middle" }}>{product.valor_venta}</td>
       <td className="text-center" style={{ verticalAlign: "middle" }}>
         <MDBBtn size="sm" onClick={() => handleEdit(product.id)}>
-          Edit
+          Editar
         </MDBBtn>
         <MDBBtn
           size="sm"
@@ -197,7 +197,7 @@ export function CrudProducts() {
           className="ms-2"
           color="danger"
         >
-          Delete
+          Eliminar
         </MDBBtn>
       </td>
     </tr>

@@ -17,6 +17,7 @@ import Cookies from "js-cookie";
 import axiosInstance from "../axiosInstance";
 import canasta from "../../images/canasta.png";
 import './style.css';
+import SessionTimeout from '../SessionTimeout'; // Importar el componente SessionTimeout
 
 export const Header = () => {
   const deleteAllCookies = () => {
@@ -33,14 +34,15 @@ export const Header = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const infocartCookie = Cookies.get("infocart");
-        if (infocartCookie) {
-          const infocartData = JSON.parse(infocartCookie);
-          const cartId = infocartData["cart id"];
+        const response = await axiosInstance.get(`/cart`);
+        const productsCount = response.data.length;
+        setItemTotal(productsCount);
 
-          const response = await axiosInstance.get(`/cart?id=${cartId}`);
-          const productsCount = response.data.length;
-          setItemTotal(productsCount);
+        // Verificar si la cookie "carrito" existe
+        const carritoCookie = Cookies.get("carrito");
+        if (!carritoCookie) {
+          // Si no existe, crearla con el valor "carrito creado"
+          Cookies.set("carrito", "carrito creado");
         }
       } catch (error) {
         console.log(
@@ -186,6 +188,7 @@ export const Header = () => {
                       SALIR
                     </Link>
                   </li>
+                
                 </>
               ) : (
                 <>
@@ -214,6 +217,11 @@ export const Header = () => {
               </Link>
             )}
           </MDBCollapse>
+
+          
+       
+                    <SessionTimeout />
+               
         </MDBContainer>
       </MDBNavbar>
     </header>
