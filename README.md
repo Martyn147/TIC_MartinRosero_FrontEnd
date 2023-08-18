@@ -11,6 +11,7 @@ Para esto se hizo uso de herramientas tales como: react principal framework para
 - [Perfiles - Usuarios](#perfiles---usuarios)
 - [Despliegue](#despliegue)
 - [Instalación](#instalación)
+- [Manual de Usuario](#Manual de Usuario)
 
 ## Perfiles - Usuarios
 
@@ -55,4 +56,6 @@ npm start
 ```
 La aplicación estará disponible en http://localhost:3000.
 
+## Manual de Usuario
 
+Puede ver el manual de usuario en formato de video [aquí](https://youtu.be/pGiigCFvgKg)
