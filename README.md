@@ -11,7 +11,7 @@ Para esto se hizo uso de herramientas tales como: react principal framework para
 - [Perfiles - Usuarios](#perfiles---usuarios)
 - [Despliegue](#despliegue)
 - [Instalación](#instalación)
-- [Manual de Usuario](#Manual de Usuario)
+- [Manual de Usuario](#manual-de-usuario)
 
 ## Perfiles - Usuarios
 
@@ -20,13 +20,13 @@ Para esto se hizo uso de herramientas tales como: react principal framework para
 | Super Admin| - Administrar cuentas de Admin                   |
 |            |                                                   |
 | Admin      | - Administrar cuentas de empleado                |
-|            | - Administrar informacion de productos           |
+|            | - Administrar información de productos           |
 |            |                                                   |
 | Empleado   | - Administrar pedidos de clientes                |
 |            |                                                   |
 | Cliente    | - Realizar un carrito de compras                 |
 |            | - Finalizar un pedido                            |
-|            | - Editar informacion de su cuenta                |
+|            | - Editar información de su cuenta                |
 
 ## Despliegue
 
