@@ -19,6 +19,10 @@ export const CreateAccount = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
+ // Determinar el título dinámico en función del idRole
+ const pageTitle = formData.idRole === 0 ? "Crear cuentas de administrador" : "Crear cuentas de empleados";
+
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevFormData) => ({
@@ -65,7 +69,7 @@ export const CreateAccount = () => {
 
   return (
     <MDBContainer className="crud-list">
-      <h1>Crear Cuenta</h1>
+    <h1>{pageTitle}</h1> {/* Mostrar el título dinámico */}
       <form onSubmit={handleSubmit}>
         <MDBRow className="mb-3">
           <MDBCol>

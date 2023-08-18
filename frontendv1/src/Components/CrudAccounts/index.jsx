@@ -4,8 +4,12 @@ import { MDBContainer, MDBTable, MDBTableHead, MDBTableBody, MDBBtn, MDBModal, M
 import { Link, useLocation } from 'react-router-dom';
 import SuccessMessage from '../SuccessMessage';
 import Pagination from '../Pagination';
+import Cookies from 'js-cookie';
 
 export const CrudAccounts = () => {
+  const idRoleFromCookie = Cookies.get('idRole');
+  const [roleTitle, setRoleTitle] = useState(''); // Nuevo estado para el título dinámico basado en el rol
+
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -15,6 +19,15 @@ export const CrudAccounts = () => {
   const location = useLocation();
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    // Establecer el título dinámico según el rol del usuario
+    if (idRoleFromCookie === '0') {
+      setRoleTitle('Administrar cuentas de administrador');
+    } else {
+      setRoleTitle('Administrar cuentas de empleados');
+    }
+  }, [idRoleFromCookie]);
 
   useEffect(() => {
     fetchAccounts();
@@ -70,23 +83,30 @@ export const CrudAccounts = () => {
   useEffect(() => {
     filterAccounts();
   }, [currentPage, accounts]);
-
+  
   const filterAccounts = () => {
     const itemsPerPage = 5;
-    const totalItems = accounts.length;
+    
+    // Inicializa accounts como un array vacío si no hay datos
+    const totalItems = accounts.length > 0 ? accounts.length : 0;
+    
     const pages = Math.ceil(totalItems / itemsPerPage);
     setTotalPages(pages);
-
+  
     const offset = (currentPage - 1) * itemsPerPage;
-    const pagedAccounts = accounts.slice(offset, offset + itemsPerPage);
+    
+    // Inicializa pagedAccounts como un array vacío si no hay datos
+    const pagedAccounts = accounts.length > 0 ? accounts.slice(offset, offset + itemsPerPage) : [];
+    
     setFilteredAccounts(pagedAccounts);
   };
-
+  
   const [filteredAccounts, setFilteredAccounts] = useState([]);
 
   return (
     <MDBContainer className="crud-list">
-      <h1>Administración de Cuentas</h1>
+      <h1>{roleTitle}</h1> {/* Mostrar el título dinámico basado en el rol */}
+     
 
       {/* Mostrar mensaje de éxito */}
       {successMessage && <SuccessMessage message={successMessage} onClose={() => setSuccessMessage(null)} />}

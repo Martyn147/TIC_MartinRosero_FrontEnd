@@ -9,8 +9,15 @@ import {
 } from "mdb-react-ui-kit";
 import "./style.css";
 import axiosInstance from '../axiosInstance';
+import { Link, useNavigate } from 'react-router-dom';
+import SuccessMessage from '../SuccessMessage'; // Importa el componente SuccessMessage
+
 
 export function CreateProducts() {
+  const navigate = useNavigate();
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Estado para controlar la visibilidad del mensaje
+
+
   const [formData, setFormData] = useState({
     id_categoria: "",
     nombre: "",
@@ -38,30 +45,24 @@ export function CreateProducts() {
     event.preventDefault();
     try {
       const formattedValor = parseFloat(formData.valor).toFixed(2);
-      const productData = {
-        id_categoria: parseInt(formData.id_categoria),
-        nombre: formData.nombre,
-        detalle: formData.detalle,
-        stock: parseInt(formData.stock),
-        valor: formattedValor,
-      };
+      const productData = new FormData(); // Usar FormData para enviar la imagen
+      productData.append("id_categoria", formData.id_categoria);
+      productData.append("nombre", formData.nombre);
+      productData.append("detalle", formData.detalle);
+      productData.append("stock", formData.stock);
+      productData.append("valor", formattedValor);
+      productData.append("file", formData.imagen);
 
-      const response = await axiosInstance.post("/products/store", productData);
+      const response = await axiosInstance.post("/products/store", productData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
       if (response.status === 201) {
         const productId = response.data.product_id;
         console.log("Producto creado con ID:", productId);
 
         // Aquí puedes realizar cualquier lógica adicional después de crear el producto
         // ...
-
-        if (formData.imagen) {
-          const imageData = new FormData();
-          imageData.append("file", formData.imagen);
-          imageData.append("id_producto", productId);
-
-          await axiosInstance.post("/image/upload", imageData);
-          console.log("Imagen del producto subida exitosamente");
-        }
 
         setFormData({
           id_categoria: "",
@@ -71,6 +72,11 @@ export function CreateProducts() {
           valor: "",
           imagen: null,
         });
+        setShowSuccessMessage(true); // Mostrar el mensaje de éxito
+        setTimeout(() => {
+          setShowSuccessMessage(false); // Ocultar el mensaje después de un tiempo
+          navigate("/IndexProducts"); // Redirigir después de ocultar el mensaje
+        }, 3000); // Ocultar el mensaje después de 3 segundos
       }
     } catch (error) {
       console.log(error);
@@ -166,6 +172,14 @@ export function CreateProducts() {
         </MDBRow>
         <MDBBtn type="submit">Crear Producto</MDBBtn>
       </form>
+    {/* Mostrar el componente SuccessMessage si showSuccessMessage es true */}
+    {showSuccessMessage && (
+        <SuccessMessage
+          title="Producto creado exitosamente"
+          message="El producto ha sido creado con éxito."
+          onClose={() => setShowSuccessMessage(false)} // Ocultar el mensaje al cerrar
+        />
+      )}
     </MDBContainer>
   );
 }

@@ -234,23 +234,33 @@ export function ProductsList() {
             {filteredProducts.map((product) => (
               <MDBCol md="12" lg="4" className="mb-4" key={product.id}>
                 <MDBCard>
-                  {/* Carrusel de imágenes */}
-                  <Carousel
-                    showArrows={true}
-                    infiniteLoop={true}
-                    showStatus={false}
-                  >
-                    {product.images.map((image) => (
-                      <div key={image.id}>
-                        <img
-                          src={image.cloudinary_url}
-                          alt={`Imagen ${image.id}`}
-                          style={{ maxWidth: "200px", objectFit: "cover" }}
-                        />
-                      </div>
-                    ))}
-                  </Carousel>
+                <div
+          style={{
 
+            justifyContent: "center",
+            alignItems: "center",
+            height: "200px", // Tamaño fijo para el contenedor de la imagen
+            marginBottom: "10px", // Espacio entre las imágenes
+            overflow: "hidden", // Ocultar partes de la imagen que excedan el contenedor
+          }}
+        >
+                    {/* Carrusel de imágenes */}
+                    <Carousel
+                      showArrows={true}
+                      infiniteLoop={true}
+                      showStatus={false}
+                    >
+                      {product.images.map((image) => (
+                        <div key={image.id}>
+                          <img
+                            src={image.cloudinary_url}
+                            alt={`Imagen ${image.id}`}
+                            style={{ maxWidth: "200px", objectFit: "cover" }}
+                          />
+                        </div>
+                      ))}
+                    </Carousel>
+                  </div>
                   <MDBCardBody>
                     <MDBCardTitle>
                       <a href="#!" className="text-reset text-decoration-none">
