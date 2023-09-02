@@ -72,7 +72,8 @@ export const Register = () => {
       console.log("Formulario enviado");
 
       // Realizar la solicitud POST al endpoint de registro
-      axios
+     axios
+      .post("https://marketplaceppc.fly.dev/api/register", formData)
       .then((response) => {
         // Manejar la respuesta del servidor
         console.log(response.data);
