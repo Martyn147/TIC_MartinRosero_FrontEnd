@@ -46,8 +46,15 @@ export const Register = () => {
       errors.email = "Ingrese un correo electrónico válido";
     }
 
-    if (telefono.trim() !== "" && !isValidPhoneNumber(telefono)) {
-      errors.telefono = "Ingrese un número de teléfono válido";
+
+    if (telefono.trim() === "") {
+      errors.telefono = "El número de teléfono es obligatorio";
+    } else if (!isValidPhoneNumber(telefono)) {
+      if (!/^09/.test(telefono)) {
+        errors.telefono = "El número debe empezar con '09'";
+      } else {
+        errors.telefono = "El número debe tener 10 dígitos";
+      }
     }
 
     if (password.trim() === "") {
@@ -55,6 +62,8 @@ export const Register = () => {
     } else if (password !== password_confirmation) {
       errors.password_confirmation = "Las contraseñas no coinciden";
     }
+
+
 
     setErrors(errors);
 
@@ -64,7 +73,6 @@ export const Register = () => {
 
       // Realizar la solicitud POST al endpoint de registro
       axios
-      .post("https://marketplaceppc.fly.dev/api/register", formData)
       .then((response) => {
         // Manejar la respuesta del servidor
         console.log(response.data);
@@ -99,12 +107,21 @@ export const Register = () => {
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
+    
   };
 
   const isValidPhoneNumber = (phoneNumber) => {
+    // Verificar si el número empieza con "09" y tiene exactamente 10 dígitos
     const phoneNumberRegex = /^09\d{8}$/;
-    return phoneNumberRegex.test(phoneNumber);
+  
+    if (!phoneNumberRegex.test(phoneNumber)) {
+      // El número no cumple con los criterios
+      return false;
+    }
+  
+    return true;
   };
+  
 
   return (
     <MDBContainer className="my-5 register-container">
