@@ -28,11 +28,27 @@ export function CreateProducts() {
   });
 
   const handleInputChange = (event) => {
+    const { name, value } = event.target;
+  
+    // Validar que el valor ingresado sea un número o un número con hasta dos decimales
+    if (name === "stock") {
+      // Para el campo "Stock", solo permitir números enteros
+      if (!/^[0-9]+$/.test(value)) {
+        return; // No actualizar el estado si no es un número entero
+      }
+    } else if (name === "valor") {
+      // Para el campo "Valor de Venta", permitir números con hasta dos decimales
+      if (!/^\d+(\.\d{0,2})?$/.test(value)) {
+        return; // No actualizar el estado si no es un número con hasta dos decimales
+      }
+    }
+  
     setFormData({
       ...formData,
-      [event.target.name]: event.target.value,
+      [name]: value,
     });
   };
+  
 
   const handleImageChange = (event) => {
     setFormData({
@@ -137,7 +153,7 @@ export function CreateProducts() {
         </MDBRow>
         <MDBRow className="mb-3">
           <MDBCol>
-            <MDBInput
+          <MDBInput
               type="number"
               label="Stock"
               name="stock"
@@ -149,7 +165,7 @@ export function CreateProducts() {
         </MDBRow>
         <MDBRow className="mb-3">
           <MDBCol>
-            <MDBInput
+          <MDBInput
               type="number"
               label="Valor de Venta"
               name="valor"

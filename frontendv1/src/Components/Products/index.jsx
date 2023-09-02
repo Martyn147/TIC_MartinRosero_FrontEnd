@@ -234,16 +234,15 @@ export function ProductsList() {
             {filteredProducts.map((product) => (
               <MDBCol md="12" lg="4" className="mb-4" key={product.id}>
                 <MDBCard>
-                <div
-          style={{
-
-            justifyContent: "center",
-            alignItems: "center",
-            height: "200px", // Tamaño fijo para el contenedor de la imagen
-            marginBottom: "10px", // Espacio entre las imágenes
-            overflow: "hidden", // Ocultar partes de la imagen que excedan el contenedor
-          }}
-        >
+                  <div
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      height: "200px", // Tamaño fijo para el contenedor de la imagen
+                      marginBottom: "10px", // Espacio entre las imágenes
+                      overflow: "hidden", // Ocultar partes de la imagen que excedan el contenedor
+                    }}
+                  >
                     {/* Carrusel de imágenes */}
                     <Carousel
                       showArrows={true}

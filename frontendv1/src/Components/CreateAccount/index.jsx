@@ -2,26 +2,22 @@ import React, { useState } from "react";
 import axiosInstance from "../axiosInstance";
 import { MDBContainer, MDBRow, MDBCol, MDBInput, MDBBtn } from "mdb-react-ui-kit";
 import { Link, useNavigate } from 'react-router-dom';
-import Cookies from 'js-cookie'; // Importar el paquete de cookies
+import Cookies from 'js-cookie';
 
 export const CreateAccount = () => {
-  // Obtener el valor del rol desde la cookie "idRole"
   const idRoleFromCookie = Cookies.get('idRole');
 
-  // Definir el valor inicial del idRole en base a la cookie
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     confirmPassword: "",
-    idRole: idRoleFromCookie === '0' ? 0 : 1, // Asignar el valor correspondiente al idRole del usuario actual
+    idRole: idRoleFromCookie === '0' ? 0 : 1,
   });
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
- // Determinar el título dinámico en función del idRole
- const pageTitle = formData.idRole === 0 ? "Crear cuentas de administrador" : "Crear cuentas de empleados";
-
+  const pageTitle = formData.idRole === 0 ? "Crear cuentas de administrador" : "Crear cuentas de empleados";
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -31,8 +27,38 @@ export const CreateAccount = () => {
     }));
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.email) {
+      newErrors.email = "El correo electrónico es obligatorio";
+    } else if (!isValidEmail(formData.email)) {
+      newErrors.email = "Ingrese un correo electrónico válido";
+    }
+
+    if (!formData.password) {
+      newErrors.password = "La contraseña es obligatoria";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "La contraseña debe tener al menos 8 caracteres";
+    }
+
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "La confirmación de contraseña es obligatoria";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "Las contraseñas no coinciden";
+    }
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       const response = await axiosInstance.post(
@@ -44,10 +70,8 @@ export const CreateAccount = () => {
         }
       );
 
-      // Handle the response from the API if needed (e.g., show a success message)
       console.log(response.data);
 
-      // Clear form fields after successful submission
       setFormData({
         email: "",
         password: "",
@@ -56,7 +80,6 @@ export const CreateAccount = () => {
 
       setErrors({});
 
-      // Redireccionar al usuario a la página de administración de cuentas si la creación fue exitosa
       navigate("/IndexAcontsAdmins");
     } catch (error) {
       if (error.response && error.response.data && error.response.data.errors) {
@@ -67,9 +90,14 @@ export const CreateAccount = () => {
     }
   };
 
+  const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   return (
     <MDBContainer className="crud-list">
-    <h1>{pageTitle}</h1> {/* Mostrar el título dinámico */}
+      <h1>{pageTitle}</h1>
       <form onSubmit={handleSubmit}>
         <MDBRow className="mb-3">
           <MDBCol>
@@ -80,9 +108,10 @@ export const CreateAccount = () => {
               value={formData.email}
               onChange={handleInputChange}
               required
+              invalid={errors.email ? "true" : "false"}
             />
             {errors.email && (
-              <div className="invalid-feedback d-block">{errors.email[0]}</div>
+              <div className="register-error">{errors.email}</div>
             )}
           </MDBCol>
         </MDBRow>
@@ -95,9 +124,10 @@ export const CreateAccount = () => {
               value={formData.password}
               onChange={handleInputChange}
               required
+              invalid={errors.password ? "true" : "false"}
             />
             {errors.password && (
-              <div className="invalid-feedback d-block">{errors.password[0]}</div>
+              <div className="register-error">{errors.password}</div>
             )}
           </MDBCol>
         </MDBRow>
@@ -110,9 +140,10 @@ export const CreateAccount = () => {
               value={formData.confirmPassword}
               onChange={handleInputChange}
               required
+              invalid={errors.confirmPassword ? "true" : "false"}
             />
             {errors.confirmPassword && (
-              <div className="invalid-feedback d-block">{errors.confirmPassword[0]}</div>
+              <div className="register-error">{errors.confirmPassword}</div>
             )}
           </MDBCol>
         </MDBRow>
